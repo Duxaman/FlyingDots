@@ -1,5 +1,13 @@
 const MovableBodyForcesLimit = 20;
-
+const Friction = 0.0008
+const BaseRadius = 30;
+const BaseAcceleration = 0.1;
+const BaseMass = 100;
+const BaseShellMass = 2;
+const BaseShellRadius = 2;
+const BaseMaxHP = 500;
+const BaseDamage = 4;
+const BaseDistance = 300;
 
 /*css классы для игровых объектов*/
 const AssetId =
