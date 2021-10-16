@@ -27,8 +27,27 @@ const AssetId =
         LiteWeaponUI: "LiteWeaponUI",
         FireWeaponUI: "FireWeaponUI",
         BibaWeaponUI: "BibaWeaponUI",
+        HealBuffItemUI: "HealBuffItemUI"
     }
 
+}
+
+class GUID {
+    static CreateGuid() {
+        function _p8(s) {
+            var p = (Math.random().toString(16) + "000000000").substr(2, 8);
+            return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
+        }
+        return _p8() + _p8(true) + _p8(true) + _p8();
+    }
+}
+
+class Randomizer {
+    static GetRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min)) + min;
+    }
 }
 
 class Point {
@@ -178,9 +197,9 @@ class WeaponItem extends InventoryItem {
     }
 
     ActivateItem(PlayerObj) {
-        //create shell with the same coordinates and angle that player have //TODO: id
+        //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
-            return new Shell(PlayerObj.GetPosition(), this._Radius, this._Mass, this._AssetId, 1, this._Distance, this._Damage);
+            return new Shell(PlayerObj.GetPosition(), this._Radius, this._Mass, this._AssetId, GUID.CreateGuid(), this._Distance, this._Damage);
         }
         else {
             throw "Этот элемент закончился";
