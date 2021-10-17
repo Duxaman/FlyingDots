@@ -1,15 +1,16 @@
 class Inventory {
 	constructor(MaxCapacity) {
 		this._Items = []
-        this._MaxCapacity = MaxCapacity;
+		this._MaxCapacity = MaxCapacity;
 	}
 	AddItem(invItem) {
 		if (invItem instanceof InventoryItem) {
-            if(this._Items.length < this._MaxCapacity)
-            {
-                this._Items.push(invItem);
-            }
+			if (this._Items.length < this._MaxCapacity) {
+				this._Items.push(invItem);
+				return true;
+			}
 		}
+		return false;
 	}
 	ClearItems() {
 		this._Items.length = 0;

@@ -1,13 +1,3 @@
-const MovableBodyForcesLimit = 20;
-const Friction = 0.0008
-const BaseRadius = 30;
-const BaseAcceleration = 0.1;
-const BaseMass = 100;
-const BaseShellMass = 2;
-const BaseShellRadius = 2;
-const BaseMaxHP = 500;
-const BaseDamage = 4;
-const BaseDistance = 300;
 
 /*css классы для игровых объектов*/
 const AssetId =
@@ -181,6 +171,10 @@ class InventoryItem extends SpawnableObject {
         this.Amount = Amount;
     }
 
+    Dectivate() {
+        this._State = false;
+    }
+
     ActivateItem() {
         throw "InventoryItem - абстрактный класс, следует вызвать метод у потомка"
     }
@@ -299,6 +293,17 @@ class MovableObject extends GameObject {
         }
     }
 
+    /**
+     * Сбрасывает все силы объекта
+     */
+    FlushForces() {
+        this._Forces = [];
+    }
+
+    Teleport(NewPosition) {
+        this._Position = Position;
+    }
+
     GetAngle() {
         return this._Angle;
     }
@@ -350,6 +355,7 @@ class Shell extends MovableObject {
             }
         }
     }
+
 
 
     GetMaxDistance() {

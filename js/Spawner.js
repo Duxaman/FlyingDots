@@ -11,8 +11,7 @@ class Spawner {
             let y = Randomizer.GetRandomInt(0, Map.Height);
             let MapPoint = Map.GetElement(x, y);
             if (MapPoint !== undefined) {
-                if (MapPoint.Players.length === 0 &&
-                    MapPoint.GameObjects.length === 0) //only spawn if there is no other players and other buffs
+                if (MapPoint.length === 0) //only spawn if there is nothing at this point
                 {
                     return new Point(x, y);
                 }
