@@ -1,0 +1,144 @@
+.menu {
+    background-color: lightsalmon;
+    font-family: Arial;
+    font-weight: bold;
+    border-radius: 5px;
+    border-style: dashed;
+    overflow: hidden;
+    padding: 0;
+}
+
+#mainmenu {
+    margin-left: 40%;
+    margin-top: 200px;
+    width: 20%;
+}
+
+#pausemenu {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    padding: 20px;
+    display: none;
+}
+
+li {
+    width: 100%;
+    line-height: 40px;
+    list-style-type: none;
+    text-align: center;
+}
+
+li:hover {
+    background-color: yellow;
+    font-style: oblique;
+    border-style: groove;
+    cursor: pointer;
+}
+
+/**PlayArea*/
+
+#workplace {
+    width: 100%;
+    height: 100%;
+    background-image: url(res/background.jpg);
+    background-repeat: repeat;
+}
+
+.box {
+    font-family: Arial;
+    font-weight: bold;
+    border-radius: 5px;
+    border-style: dashed;
+    overflow: hidden;
+    background-color: lightsalmon;
+    opacity: 0.5;
+}
+
+#inventory {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    height: 50px;
+}
+
+#invtable td {
+    height: 40px;
+    width: 40px;
+    border-style: solid;
+}
+
+#invtable td:hover {
+    border-color: yellow;
+}
+
+#dashboard {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 300px;
+    height: 50px;
+    font-size: 35px;
+    display: inline;
+}
+
+#healthbox {
+    display: inline-block;
+}
+
+#hp {
+    color: black;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#healthplaceholder {
+    width: 200px;
+    height: 20px;
+    background-color: gray;
+}
+
+#healthbar {
+    width: 170px;
+    height: 20px;
+    background-color: yellow;
+}
+
+#scorebox {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 200px;
+    height: 20px;
+    font-size: 20px;
+    text-align: center;
+}
+
+#time {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 20px;
+    font-size: 20px;
+    text-align: center;
+}
+
+/**PlayArea End**/
+
+/**Movable Objects**/
+
+/**Movable Objects End**/
+
+/**InventoryItems**/
+
+/**InventoryItems End**/
+
+html {
+    background-color: black;
+}
+
+body, html {
+    height: 100%;
+}

@@ -234,7 +234,7 @@ class Game {
                 element.style.left = obj.Position.X + "px";
             }
             else {
-                element = this._Window.createElement('div');
+                element = this._Window.createElement('div'); //TODO: move to external class
                 element.setAttribute('id', obj.Id);
                 element.setAttribute('class', obj.GetAssetId());
                 this._Window.document.getElementById(PlayAreaId).appendChild(element);
