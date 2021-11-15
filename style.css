@@ -129,9 +129,80 @@ li:hover {
 
 /**Movable Objects**/
 
+/*Radius of the bodies should be set by renderer*/
+
+.Body {
+    position: absolute;
+}
+
+.Ship {
+    border-radius: 20%;
+}
+
+.Player {
+    background-color: green;
+}
+
+.Enemy {
+    background-color: red;
+    color: yellow;
+    font-size: 12px;
+    margin-top: 100%;
+}
+
+.Star {
+    border-radius: 100%;
+    background-repeat: repeat;
+    background-image: url(res/star.png);
+}
+
+.Asteroid {
+    border-radius: 100%;
+    background-repeat: repeat;
+    background-image: url(res/asteroid.png);
+}
+
+.LiteWeaponShell {
+    background-color: white;
+}
+
+.FireWeaponShell {
+    background-color: yellow;
+}
+
+.BibaWeaponShell {
+    background-image: url(res/biba.gif);
+    size: 30px;
+}
+
 /**Movable Objects End**/
 
 /**InventoryItems**/
+
+.HealBuffItem {
+    background-image: url(res/heal.png);
+    size: 30px;
+}
+
+.LiteWeaponUI {
+    background-image: url(res/lightcannon.png);
+    size: 30px;
+}
+
+.FireWeaponUI {
+    background-image: url(res/firecannon.png);
+    size: 30px;
+}
+
+.BibaWeaponUI {
+    background-image: url(res/biba.gif);
+    size: 30px;
+}
+
+.HealBuffItemUI {
+    background-image: url(res/heal.png);
+    size: 30px;
+}
 
 /**InventoryItems End**/
 
