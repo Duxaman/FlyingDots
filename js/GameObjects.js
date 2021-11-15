@@ -164,7 +164,7 @@ class InventoryItem extends SpawnableObject {
      * @param {*} Position - Позиция тела на карте
      * @param {*} Id - Идентификатор тела
      * @param {*} AssetId - Сss класс
-     * @param {*} Amount - Радиус тела
+     * @param {*} Amount - Количество элементов
      */
     constructor(Position, Id, AssetId, Amount) {
         super(Position, Id, AssetId);
@@ -190,7 +190,7 @@ class WeaponItem extends InventoryItem {
      * @param {*} Position - Позиция тела на карте
      * @param {*} Id - Идентификатор тела
      * @param {*} AssetId - Сss класс
-     * @param {*} Amount - Радиус тела
+     * @param {*} Amount - Количество элементов
      * @param {*} shelltemplate - Снаряд хранящийся в данном элементе
      */
     constructor(Position, Id, AssetId, Amount, shelltemplate) {
@@ -219,7 +219,7 @@ class BuffItem extends InventoryItem {
      * @param {*} Position - Позиция тела на карте
      * @param {*} Id - Идентификатор тела
      * @param {*} AssetId - Сss класс
-     * @param {*} Amount - Радиус тела
+     * @param {*} Amount - Количество элементов
      * @param {*} Power - Мощность баффа
      */
     constructor(Position, Id, AssetId, Amount, Power) {
