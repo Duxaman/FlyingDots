@@ -4,28 +4,28 @@ const AssetId =
 {
     Players:
     {
-        Player: "Player",
-        Enemy: "Enemy"
+        Player: "Body Ship Player",
+        Enemy: "Body Ship Enemy"
     },
     Bodies:
     {
-        Star: "Star",
-        Asteroid: "Asteroid",
+        Star: "Body Star",
+        Asteroid: "Body Asteroid",
     },
     Shells:
     {
-        LiteWeaponShell: "LiteWeaponShell",
-        FireWeaponShell: "FireWeaponShell",
-        BibaWeaponShell: "BibaWeaponShell"
+        LiteWeaponShell: "Body LiteWeaponShell",
+        FireWeaponShell: "Body FireWeaponShell",
+        BibaWeaponShell: "Body BibaWeaponShell"
     },
     Buffs: {
-        HealBuffItem: "HealBuffItem",
+        HealBuffItem: "Body HealBuffItem",
     },
     UI: {
-        LiteWeaponUI: "LiteWeaponUI",
-        FireWeaponUI: "FireWeaponUI",
-        BibaWeaponUI: "BibaWeaponUI",
-        HealBuffItemUI: "HealBuffItemUI"
+        LiteWeaponUI: "Body LiteWeaponUI",
+        FireWeaponUI: "Body FireWeaponUI",
+        BibaWeaponUI: "Body BibaWeaponUI",
+        HealBuffItemUI: "Body HealBuffItemUI"
     }
 
 }

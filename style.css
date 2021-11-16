@@ -135,6 +135,8 @@ li:hover {
 
 .Body {
     position: absolute;
+    overflow: visible;
+    z-index: 1;
 }
 
 .Ship {
@@ -143,13 +145,21 @@ li:hover {
 
 .Player {
     background-color: green;
+    color: yellow;
+    font-size: 12px;
 }
 
 .Enemy {
     background-color: red;
     color: yellow;
     font-size: 12px;
+}
+
+div#workplace p {
     margin-top: 100%;
+    position: relative;
+    text-align: center;
+    z-index: 2;
 }
 
 .Star {
@@ -174,7 +184,6 @@ li:hover {
 
 .BibaWeaponShell {
     background-image: url(res/biba.gif);
-    size: 30px;
 }
 
 /**Movable Objects End**/
@@ -183,27 +192,32 @@ li:hover {
 
 .HealBuffItem {
     background-image: url(res/heal.png);
-    size: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 .LiteWeaponUI {
     background-image: url(res/lightcannon.png);
-    size: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 .FireWeaponUI {
     background-image: url(res/firecannon.png);
-    size: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 .BibaWeaponUI {
     background-image: url(res/biba.gif);
-    size: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 .HealBuffItemUI {
     background-image: url(res/heal.png);
-    size: 30px;
+    width: 30px;
+    height: 30px;
 }
 
 /**InventoryItems End**/

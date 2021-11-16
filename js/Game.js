@@ -226,6 +226,7 @@ class Game {
      * Отображает содержимое карты в интерфейс пользователя
      */
     _Render() {
+        let PlayArea = this._Window.document.getElementById(PlayAreaId);
         for (obj in this._GameObjects) {
             var element;
             element = this._Window.document.getElementById(obj.Id);
@@ -234,10 +235,19 @@ class Game {
                 element.style.left = obj.Position.X + "px";
             }
             else {
-                element = this._Window.createElement('div'); //TODO: move to external class
+                element = this._Window.createElement('div');
                 element.setAttribute('id', obj.Id);
                 element.setAttribute('class', obj.GetAssetId());
-                this._Window.document.getElementById(PlayAreaId).appendChild(element);
+                if (obj instanceof GameObject) {
+                    element.style.width = obj.GetRadius() + "px";
+                    element.style.height = obj.GetRadius() + "px";
+                    element.style.top = obj.Position.Y + "px";
+                    element.style.left = obj.Position.X + "px";
+                }
+                if (obj instanceof Player) {
+                    element.innerHTML = '<p>' + obj.GetName() + '</p>';
+                }
+                PlayArea.appendChild(element);
             }
         }
 
