@@ -7,7 +7,7 @@
     <title>Flying Dots - Game</title>
 </head>
 
-<body>
+<body onload="InitGame()">
     <div id="workplace">
         <!-- Bodies format example
         <div class="Body Ship Player" style="top: 50px; left:100px; width: 30px; height: 30px;">
@@ -58,6 +58,79 @@
         <li>Resume</li>
         <li>Quit</li>
     </ul>
+    <div class="settings">
+        Difficulty:
+        <select>
+            <option value=" 0">Easy</option>
+            <option selected value="1">Medium</option>
+            <option value="2">Hard</option>
+            <option value="3">Nuts</option>
+        </select><br><br>
+        Name:
+        <input type="text" id="name">
+        <div>
+            <input type="button" value="Launch Game" onclick="StartGame()">
+            <input type="button" value="Cancel" onclick="window.location = 'main.html'">
+        </div>
+    </div>
+    <script>
+        class ControlAdapter {
+            constructor(Game, GameOverCallback) {
+                this._GameObject = Game;
+                this._GameOverCallback = GameOverCallback;
+            }
+            //TODO: Continue here
+            HandleKeyboardMovement() {
+                //analyze pressed key, call needed action
+            }
+
+            StartGame() {
+                //activate update timers, hide pausemenu
+            }
+
+            StopGame() {
+                //stop update timers, stop game
+            }
+
+            PauseGame() {
+                //pause game, show pause menu
+            }
+
+            _OnGameOver() {
+                //stop update timers
+                //call callback
+            }
+
+            /*TODO: Score mgm should be in another class*/
+        }
+
+        function InitGame() {
+            document.getElementsByClassName('settings')[0].style.display = 'block';
+        }
+
+        function StartGame() {
+            let name = document.getElementById('name').value;
+            let value = document.getElementsByTagName('select')[0].value;
+            if (name !== '') {
+                document.getElementsByClassName('settings')[0].style.display = 'none';
+                var PlayAdapter = new ControlAdapter(...); //put game inside adapter
+            }
+            else alert(" You need to enter your name first!");
+        }
+
+        function FinishGame() {
+            //redirect to leaderboards
+        }
+
+    </script>
+    <script src="js/Constants.js"></script>
+    <script src="js/GameObjects.js"></script>
+    <script src="js/Inventory.js"></script>
+    <script src="js/Map.js"></script>
+    <script src="js/MapGenerator.js"></script>
+    <script src="js/Spawner.js"></script>
+    <script src="js/CollisionCalculator.js"></script>
+    <script src="js/Game.js"></script>
 </body>
 
 </html>

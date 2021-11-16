@@ -334,7 +334,7 @@ class Shell extends MovableObject {
 
     AddForce(force) {
         if (!this._BaseForceAdded) {
-            super(force)
+            super.AddForce(force)
             this._BaseForceAdded = true;
         }
         else {
@@ -345,7 +345,7 @@ class Shell extends MovableObject {
 
     Move() {
         if (this.IsActive()) {
-            super();
+            super.Move();
             this._CurrentDistance += Point.Distance(this._Position, this._OldPos);
             if (this._CurrentDistance === this._MaxDistance) {
                 this._State = false;

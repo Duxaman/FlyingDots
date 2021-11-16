@@ -31,7 +31,7 @@ class ColisionCalculator {
          * 3) Столкновение игрока с концом карты : Удаляем все силы из тела, перемещаем обратно на карту
          */
         if (!(GameObj instanceof MovableObject)) return;
-        let Position = GameObj.GetPosition();
+        let Position = GameObj.GetPosition();    //TODO: Что если объекты по умолчанию будут в колизии?
         if (GameObj instanceof Player) {
             let Colliders = this._GetCollidableObjects(GameObj.Position, Map);
             for (let i = 0; i < Colliders.length; ++i) {

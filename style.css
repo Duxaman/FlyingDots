@@ -1,4 +1,4 @@
-.menu {
+.menu, .settings {
     background-color: lightsalmon;
     font-family: Arial;
     font-weight: bold;
@@ -6,6 +6,23 @@
     border-style: dashed;
     overflow: hidden;
     padding: 0;
+}
+
+.settings {
+    position: absolute;
+    top: 40%;
+    left: 40%;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    text-align: left;
+    width: 20%;
+    display: none;
+}
+
+.settings div {
+    text-align: center;
+    margin: 10px;
 }
 
 #mainmenu {

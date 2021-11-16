@@ -50,7 +50,6 @@ class Spawner {
         let Asset = AssetId.Players.Enemy;
         let Radius = BaseRadius;
         let Mass = BaseMass;
-        let MaxHp = BaseMaxHP;
         let Name = this.DefaultNames[Randomizer.GetRandomInt(1, this.DefaultNames.length)];
         let ID = GUID.CreateGuid();
         return new Player(MapPoint, ID, Asset, Radius, Mass, Name, MaxHp);
