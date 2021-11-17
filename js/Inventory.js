@@ -2,6 +2,7 @@ class Inventory {
 	constructor(MaxCapacity) {
 		this._Items = []
 		this._MaxCapacity = MaxCapacity;
+		this._SelectedIndex = 0;
 	}
 	AddItem(invItem) {
 		if (invItem instanceof InventoryItem) {
@@ -20,18 +21,25 @@ class Inventory {
 			return this._Items[id];
 		}
 	}
+
+	Count() {
+		this._Items.length;
+	}
 	ClearItem(id) {
 		if (id > 0 && id < this._Items.length) {
 			this._Items.splice(id, 1);
 		}
 	}
-	ActivateItemById(id, Player) {
-		if (id > 0 && id < this.Items.length) {
-			var ActivationResult = this._Items[id].ActivateItem(Player);
-			if (this._Items[id].Amount == 0) {
-				this._Items.splice(id, 1);
-			}
-			return ActivationResult; //it may be undefined or new shell to spawn
+	SelectItem(id) {
+		if (id > 0 && id < this._Items.length) {
+			this._SelectedIndex = id;
 		}
+	}
+	ActivateItem(Player) {
+		var ActivationResult = this._Items[_SelectedIndex].ActivateItem(Player);
+		if (this._Items[_SelectedIndex].Amount == 0) {
+			this._Items.splice(_SelectedIndex, 1);
+		}
+		return ActivationResult; //it may be undefined or new shell to spawn
 	}
 }

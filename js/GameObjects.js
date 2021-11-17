@@ -201,6 +201,7 @@ class WeaponItem extends InventoryItem {
     ActivateItem(PlayerObj) {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
+            //TODO: add force to shell before
             return new Shell(PlayerObj.GetPosition(), this._Radius, this._Mass, this._AssetId, GUID.CreateGuid(), this._Distance, this._Damage);
         }
         else {

@@ -7,7 +7,7 @@
     <title>Flying Dots - Game</title>
 </head>
 
-<body onload="InitGame()">
+<body onload="ShowSettings()">
     <div id="workplace">
         <!-- Bodies format example
         <div class="Body Ship Player" style="top: 50px; left:100px; width: 30px; height: 30px;">
@@ -55,8 +55,8 @@
         00:00
     </div>
     <ul id="pausemenu" class="menu">
-        <li>Resume</li>
-        <li>Quit</li>
+        <li onclick="ToogleGamePause()">Resume</li>
+        <li onclick="StopGame()">Quit</li>
     </ul>
     <div class="settings">
         Difficulty:
@@ -74,52 +74,74 @@
         </div>
     </div>
     <script>
-        class ControlAdapter {
-            constructor(Game, GameOverCallback) {
-                this._GameObject = Game;
-                this._GameOverCallback = GameOverCallback;
-            }
-            //TODO: Continue here
-            HandleKeyboardMovement() {
-                //analyze pressed key, call needed action
-            }
+        var GameObj;
+        var Timer;
+        var TimerState;
+        var ScoreBox;
+        var TimeBox;
+        var HpBox;
 
-            StartGame() {
-                //activate update timers, hide pausemenu
+        function HandleInput(event) {
+            switch (event.key) {
+                case "Escape": ToogleGamePause();
+                default:
+                    break; //player movements are handled in game obj
             }
-
-            StopGame() {
-                //stop update timers, stop game
-            }
-
-            PauseGame() {
-                //pause game, show pause menu
-            }
-
-            _OnGameOver() {
-                //stop update timers
-                //call callback
-            }
-
-            /*TODO: Score mgm should be in another class*/
         }
 
-        function InitGame() {
+        function ShowSettings() {
             document.getElementsByClassName('settings')[0].style.display = 'block';
         }
 
         function StartGame() {
             let name = document.getElementById('name').value;
-            let value = document.getElementsByTagName('select')[0].value;
+            let diffvalue = document.getElementsByTagName('select')[0].value;
             if (name !== '') {
+                let size = new Point(Window.innerWidth, Window.innerHeight);
                 document.getElementsByClassName('settings')[0].style.display = 'none';
-                var PlayAdapter = new ControlAdapter(...); //put game inside adapter
+                ScoreBox = document.getElementById('score');
+                TimeBox = document.getElementById('time');
+                HpBox = document.getElementById('hp');
+                GameObj = new Game(Window, size, OnGameOver, name, diffvalue);
+                GameObj.Start();
+                Window.addEventListener('keydown', HandleInput);
+                TimerState = true;
+                Timer = setInterval(UpdateUI, 1000);
             }
             else alert(" You need to enter your name first!");
         }
 
-        function FinishGame() {
-            //redirect to leaderboards
+        function StopGame() {
+            Window.removeEventListener('keydown', HandleInput);
+            GameObj.Stop();
+        }
+
+        function ToogleGamePause() {
+            if (TimerState) {
+                clearTimeout(Timer);
+                GameObj.Pause();
+                document.getElementById('pausemenu').style.display = 'block';
+            }
+            else {
+                document.getElementById('pausemenu').style.display = 'none';
+                GameObj.Start();
+                Timer = setInterval(UpdateUI, 500);
+            }
+            TimerState = !TimerState;
+        }
+
+        function UpdateUI() {
+            TimeBox.InnerText = GameObj.GetTime();
+            ScoreBox.InnerText = GameObj.GetScore();
+            HpBox.InnerText = GameObj.GetPlayerSTat();
+            //also update inventory
+        }
+
+
+        function OnGameOver(PlayerName, SavedTime, Score) {
+            clearTimeout(Timer);
+            //save result
+            //redirect to leaderboards page
         }
 
     </script>

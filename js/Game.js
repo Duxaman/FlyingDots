@@ -6,6 +6,29 @@ const Difficulty =
     Nuts: 3,
 }
 
+
+class ControlHandler { //TODO: continue here, add event to gameobj
+    static ApplyAction(Action, Player) {
+        switch (Action) {
+            case ' ':
+                Player.Inventory.ActivateItem(Player);
+                break;
+            case 'up':
+                Player.AddForce(new Force(BaseAcceleration, 270));
+                break;
+            case 'down':
+                Player.AddForce(new Force(BaseAcceleration, 90));
+                break;
+            case 'left':
+                Player.AddForce(new Force(BaseAcceleration, 180));
+                break;
+            case 'right':
+                Player.AddForce(new Force(BaseAcceleration, 0));
+                break;
+        }
+    }
+}
+
 /**
  * Управляющий объект игры
  */
@@ -101,7 +124,19 @@ class Game {
      */
     Stop() {
         this._SuspendGame();
-        OnGameOver(this._SavedTime, this._Score);
+        OnGameOver(this._PlayerName, this._SavedTime, this._Score);
+    }
+
+    GetTime() {  //TODO:
+
+    }
+
+    GetScore() {
+
+    }
+
+    GetPlayerStat() {
+
     }
 
     /**
