@@ -6,25 +6,33 @@ const Difficulty =
     Nuts: 3,
 }
 
-
-class ControlHandler { //TODO: continue here, add event to gameobj
+/**
+ * Адаптер управления игроками
+ */
+class ControlHandler {
+    /**
+     * Применяет действие Action к игроку Player
+     * @param {*} Action - символ задающий определенное действие
+     * @param {*} Player - игрок по отношении к которому применяется данное действие
+     * @returns 
+     */
     static ApplyAction(Action, Player) {
         switch (Action) {
             case ' ':
-                Player.Inventory.ActivateItem(Player);
-                break;
-            case 'up':
+                return Player.Inventory.ActivateItem(Player);
+            case 'w':
                 Player.AddForce(new Force(BaseAcceleration, 270));
                 break;
-            case 'down':
+            case 's':
                 Player.AddForce(new Force(BaseAcceleration, 90));
                 break;
-            case 'left':
+            case 'a':
                 Player.AddForce(new Force(BaseAcceleration, 180));
                 break;
-            case 'right':
+            case 'd':
                 Player.AddForce(new Force(BaseAcceleration, 0));
                 break;
+            default: break;
         }
     }
 }
@@ -87,7 +95,7 @@ class Game {
          */
         this._Difficulty = Diff;
         this._PlayerName = PlayerName;
-        this.Player = null;
+        this._Player = null;
         this._Map = new Map(FieldSize.X, FieldSize.Y);
     }
 
@@ -97,8 +105,8 @@ class Game {
     Start() {
         if (!this._PauseMarker) {
             this._GameObjects = MapGenerator.GenerateMap(this._Map.Width, this._Map.Height);
-            this.Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
-            this._GameObjects.push(this.Player); //add player to objects
+            this._Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
+            this._GameObjects.push(_Player); //add player to objects
             this._Score = 0;
             this._FrameCounter = 0;
         }
@@ -107,6 +115,7 @@ class Game {
         }
         this._StartTime = performance.now(); // write startgame time
         this._FrameTimer = setInterval(this._GameTick, FrameInterval);
+        this._Window.addEventListener('keydown', _HandlePlayerMovement); //watch player movements
     }
 
     /**
@@ -127,16 +136,61 @@ class Game {
         OnGameOver(this._PlayerName, this._SavedTime, this._Score);
     }
 
-    GetTime() {  //TODO:
+    GetTime() {
+        var diff;
+        if (this._SavedTime === null) {
+            let diff = performance.now() - this._StartTime;
+        }
+        else {
+            let diff = performance.now() - this._SavedTime;
+        }
+        let sec = Math.floor(diff / 1000);
+        let hrs = Math.floor(sec / 3600);
+        sec -= hrs * 3600;
+        let min = Math.floor(sec / 60);
+        sec -= min * 60;
+
+        sec = '' + sec;
+        sec = ('00' + sec).substring(sec.length);
+
+        if (hrs > 0) {
+            min = '' + min;
+            min = ('00' + min).substring(min.length);
+            return hrs + ":" + min + ":" + sec;
+        }
+        else {
+            return min + ":" + sec;
+        }
 
     }
 
     GetScore() {
-
+        return this._Score;
     }
 
     GetPlayerStat() {
+        return [this._Player.GetHP(), this._Player.GetMaxHP()]
+    }
 
+    GetInvStat() {
+        let res = []
+        for (i = 0; i < this._Player.Inventory.Count(); ++i) {
+            let val = this._Player.Inventory.GetItemAt(i);
+            res.push([val.GetAssetId(), val.Amount]);
+        }
+        return res;
+    }
+
+    /**
+     * Отслеживает нажатие клавиш и переводит их в событие управления игроком
+     * @param {*} event - событие keydown
+     */
+    _HandlePlayerMovement(event) {
+        let res = ControlHandler.ApplyAction(event.key, _Player);
+        if (res !== undefined) {
+            //add new objects to map
+            this._GameObjects.push(res);
+        }
     }
 
     /**
@@ -151,6 +205,7 @@ class Game {
             this._SavedTime += this._EndTime - this._StartTime;
         }
         clearTimeout(this._FrameTimer); //stop game timer
+        this._Window.removeEventListener('keydown', _HandlePlayerMovement); //stop watching for user input
     }
 
     /**
@@ -203,7 +258,7 @@ class Game {
      */
     _SpawnItems() {
         let CurrentBuffs = this._GameObjects.filter(obj => obj instanceof BuffItem).length;
-        let CurrentEnemies = this._GameObjects.filter(obj => obj instanceof this.Player).length - 1; //excluding player
+        let CurrentEnemies = this._GameObjects.filter(obj => obj instanceof Player).length - 1; //excluding player
         let CurrentWeapons = this._GameObjects.filter(obj => obj instanceof WeaponItem).length;
         let BuffsToSpawn;
         let EnemiesToSpawn;

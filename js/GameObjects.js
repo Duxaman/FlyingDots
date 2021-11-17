@@ -171,7 +171,7 @@ class InventoryItem extends SpawnableObject {
         this.Amount = Amount;
     }
 
-    Dectivate() {
+    Deactivate() {
         this._State = false;
     }
 
