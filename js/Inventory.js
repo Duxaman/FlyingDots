@@ -36,9 +36,12 @@ class Inventory {
 		}
 	}
 	ActivateItem(Player) {
-		var ActivationResult = this._Items[_SelectedIndex].ActivateItem(Player);
-		if (this._Items[_SelectedIndex].Amount == 0) {
-			this._Items.splice(_SelectedIndex, 1);
+		var ActivationResult = this._Items[this._SelectedIndex].ActivateItem(Player);
+		if (this._Items[this._SelectedIndex].Amount == 0) {
+			this._Items.splice(this._SelectedIndex, 1);
+			if (this._SelectedIndex > this.Count() - 1) {
+				this._SelectedIndex = this.Count() - 1
+			}
 		}
 		return ActivationResult; //it may be undefined or new shell to spawn
 	}

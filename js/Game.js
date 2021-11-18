@@ -18,7 +18,19 @@ class ControlHandler {
      */
     static ApplyAction(Action, Player) {
         switch (Action) {
-            case ' ':
+            case '1':
+                Player.Inventory.SelectItem(0);
+                break;
+            case '2':
+                Player.Inventory.SelectItem(1);
+                break;
+            case '3':
+                Player.Inventory.SelectItem(2);
+                break;
+            case '4':
+                Player.Inventory.SelectItem(3);
+                break;
+            case 'f':
                 return Player.Inventory.ActivateItem(Player);
             case 'w':
                 Player.AddForce(new Force(BaseAcceleration, 270));
@@ -136,6 +148,9 @@ class Game {
         OnGameOver(this._PlayerName, this._SavedTime, this._Score);
     }
 
+    /**
+     * Возвращает строку содержащую время прошедшее от начала игры в формате m:s
+     */
     GetTime() {
         var diff;
         if (this._SavedTime === null) {
@@ -168,10 +183,16 @@ class Game {
         return this._Score;
     }
 
+    /**
+     * Возвращает массив с текущем HP игрока и его максимумом
+     */
     GetPlayerStat() {
         return [this._Player.GetHP(), this._Player.GetMaxHP()]
     }
 
+    /**
+     * Возвращает массив пар ид элемента инвентаря - количество для каждого слота инвенторя игрока
+     */
     GetInvStat() {
         let res = []
         for (i = 0; i < this._Player.Inventory.Count(); ++i) {

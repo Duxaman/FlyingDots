@@ -88,9 +88,6 @@ li:hover {
     padding-top: 10px;
 }
 
-#invtable td:hover {
-    border-color: yellow;
-}
 
 #dashboard {
     position: absolute;

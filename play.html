@@ -80,10 +80,31 @@
         var ScoreBox;
         var TimeBox;
         var HpBox;
+        var InvBox;
+        var SelectedInvInd;
+
+        function SelectItemUi(ind) {
+            InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
+            SelectedInvInd = ind;
+            InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+        }
 
         function HandleInput(event) {
             switch (event.key) {
                 case "Escape": ToogleGamePause();
+                    break;
+                case '1':
+                    SelectItemUi(1);
+                    break;
+                case '2':
+                    SelectItemUi(2);
+                    break;
+                case '3':
+                    SelectItemUi(3);
+                    break;
+                case '4':
+                    SelectItemUi(4);
+                    break;
                 default:
                     break; //player movements are handled in game obj
             }
@@ -102,6 +123,10 @@
                 ScoreBox = document.getElementById('score');
                 TimeBox = document.getElementById('time');
                 HpBox = document.getElementById('hp');
+                InvBox = [];
+                for (i = 1; i <= 4; ++i) {
+                    InvBox.push(document.getElementById('inv' + i));
+                }
                 GameObj = new Game(Window, size, OnGameOver, name, diffvalue);
                 GameObj.Start();
                 Window.addEventListener('keydown', HandleInput);
@@ -112,7 +137,6 @@
         }
 
         function StopGame() {
-            Window.removeEventListener('keydown', HandleInput);
             GameObj.Stop();
         }
 
@@ -133,12 +157,28 @@
         function UpdateUI() {
             TimeBox.InnerText = GameObj.GetTime();
             ScoreBox.InnerText = GameObj.GetScore();
-            HpBox.InnerText = GameObj.GetPlayerSTat();
-            //also update inventory
+            HpBox.InnerText = GameObj.GetPlayerStat();
+            UpdateInventory();
         }
 
+        function UpdateInventory() {
+            let inv = GameObj.GetPlayerStat();
+            for (i = 0; i < inv.Length; ++i) {
+                InvBox[i].setAttribute('class', inv[i][0]);
+                InvBox[i].InnerText = inv[i][1];
+            }
+            if (SelectedInvInd !== undefined) {
+                if (SelectedInvInd >= inv.Length - 1) //if item has been removed
+                {
+                    InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
+                    SelectedInvInd = inv.Length - 1;
+                    InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+                }
+            }
+        }
 
         function OnGameOver(PlayerName, SavedTime, Score) {
+            Window.removeEventListener('keydown', HandleInput);
             clearTimeout(Timer);
             //save result
             //redirect to leaderboards page
