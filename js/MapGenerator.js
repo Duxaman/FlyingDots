@@ -19,11 +19,12 @@ class MapGenerator {
         let StaticBodyAm = Randomizer.GetRandomInt(0, MaxStaticBodiesPerMap);
         let MovableBodyAm = Randomizer.GetRandomInt(0, MaxMovableBodiesPerMap);
         let gameobjects = [];
-        let Position = new Point(Randomizer.GetRandomInt(0, width), Randomizer.GetRandomInt(0, height));
         for (let i = 0; i < StaticBodyAm; ++i) {
+            let Position = new Point(Randomizer.GetRandomInt(0, width), Randomizer.GetRandomInt(0, height));
             gameobjects.push(this._GenerateStaticBody(Position));
         }
         for (let i = 0; i < MovableBodyAm; ++i) {
+            let Position = new Point(Randomizer.GetRandomInt(0, width), Randomizer.GetRandomInt(0, height));
             gameobjects.push(this._GenerateMovableBody(Position));
         }
         return gameobjects;

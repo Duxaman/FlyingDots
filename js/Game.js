@@ -55,13 +55,12 @@ class ControlHandler {
 class Game {
     /**
      * 
-     * @param {*} Window - Document window 
      * @param {*} FieldSize - Point задающий размер игрового поля
      * @param {*} OnGameOver - Функция вызываемая по окончанию игры, аргументы: Время игрока, счет 
      * @param {*} PlayerName - Имя игрока
      * @param {*} Diff - Сложность игры (0-3)
      */
-    constructor(Window, FieldSize, OnGameOver, PlayerName, Diff) {
+    constructor(FieldSize, OnGameOver, PlayerName, Diff) {
         /**
          * Время начала игры
          */
@@ -82,10 +81,6 @@ class Game {
          * Функция вызываемая после окончания игры, аргументы: Время игрока, счет 
          */
         this._GameOverCallback = OnGameOver;
-        /**
-         * Document.Window для отрисовки игры
-         */
-        this._Window = Window;
         /**
          * Маркер паузы
          */
@@ -127,7 +122,7 @@ class Game {
         }
         this._StartTime = performance.now(); // write startgame time
         this._FrameTimer = setInterval(this._GameTick, FrameInterval);
-        this._Window.addEventListener('keydown', _HandlePlayerMovement); //watch player movements
+        window.addEventListener('keydown', _HandlePlayerMovement); //watch player movements
     }
 
     /**
@@ -195,7 +190,7 @@ class Game {
      */
     GetInvStat() {
         let res = []
-        for (i = 0; i < this._Player.Inventory.Count(); ++i) {
+        for (let i = 0; i < this._Player.Inventory.Count(); ++i) {
             let val = this._Player.Inventory.GetItemAt(i);
             res.push([val.GetAssetId(), val.Amount]);
         }
@@ -226,7 +221,7 @@ class Game {
             this._SavedTime += this._EndTime - this._StartTime;
         }
         clearTimeout(this._FrameTimer); //stop game timer
-        this._Window.removeEventListener('keydown', _HandlePlayerMovement); //stop watching for user input
+        window.removeEventListener('keydown', _HandlePlayerMovement); //stop watching for user input
     }
 
     /**
@@ -327,7 +322,7 @@ class Game {
         let ElementsToRemove = this._GameObjects.filter(obj => !obj.IsActive());
         if (ElementsToRemove.length > 0) {
             for (obj in ElementsToRemove) {
-                let El = this._Window.document.getElementById(obj.Id);
+                let El = document.getElementById(obj.Id);
                 El.parentNode.removeChild(El);
             }
         }
@@ -337,16 +332,16 @@ class Game {
      * Отображает содержимое карты в интерфейс пользователя
      */
     _Render() {
-        let PlayArea = this._Window.document.getElementById(PlayAreaId);
+        let PlayArea = document.getElementById(PlayAreaId);
         for (obj in this._GameObjects) {
             var element;
-            element = this._Window.document.getElementById(obj.Id);
+            element = document.getElementById(obj.Id);
             if (element !== undefined) {
                 element.style.top = obj.Position.Y + "px";
                 element.style.left = obj.Position.X + "px";
             }
             else {
-                element = this._Window.createElement('div');
+                element = document.createElement('div');
                 element.setAttribute('id', obj.Id);
                 element.setAttribute('class', obj.GetAssetId());
                 if (obj instanceof GameObject) {

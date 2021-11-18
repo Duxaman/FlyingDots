@@ -110,12 +110,12 @@
         }
 
         function InitBoxes() {
-            ScoreBox = document.getElementById('score');
+            ScoreBox = document.getElementById('scorebox');
             TimeBox = document.getElementById('time');
             HpBox = document.getElementById('hp');
             HpBar = document.getElementById('healthbar');
             InvBox = [];
-            for (i = 1; i <= 4; ++i) {
+            for (let i = 1; i <= 4; ++i) {
                 InvBox.push(document.getElementById('inv' + i));
             }
         }
@@ -124,12 +124,12 @@
             let name = document.getElementById('name').value;
             let diffvalue = document.getElementsByTagName('select')[0].value;
             if (name !== '') {
-                let size = new Point(Window.innerWidth, Window.innerHeight);
+                let size = new Point(window.innerWidth, window.innerHeight);
                 document.getElementsByClassName('settings')[0].style.display = 'none';
                 InitBoxes();
-                GameObj = new Game(Window, size, OnGameOver, name, diffvalue);
+                GameObj = new Game(window, size, OnGameOver, name, diffvalue);
                 GameObj.Start();
-                Window.addEventListener('keydown', HandleInput);
+                window.addEventListener('keydown', HandleInput);
                 TimerState = true;
                 Timer = setInterval(UpdateUI, 500);
             }
@@ -169,7 +169,7 @@
 
         function UpdateInventory() {
             let inv = GameObj.GetPlayerStat();
-            for (i = 0; i < inv.Length; ++i) {
+            for (let i = 0; i < inv.Length; ++i) {
                 InvBox[i].setAttribute('class', inv[i][0]);
                 InvBox[i].InnerText = inv[i][1];
             }
@@ -190,7 +190,7 @@
         }
 
         function OnGameOver(PlayerName, SavedTime, Score) {
-            Window.removeEventListener('keydown', HandleInput);
+            window.removeEventListener('keydown', HandleInput);
             clearTimeout(Timer);
             //save result
             //redirect to leaderboards page
