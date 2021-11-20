@@ -50,6 +50,19 @@ class ControlHandler {
 }
 
 /**
+ * Представляет хранилище всех игровых объектов
+ */
+class ObjectPool {
+    constructor() {
+        this.Players = [];
+        this.Shells = [];
+        this.StaticBodies = [];
+        this.MovableBodies = [];
+        this.InvItems = [];
+    }
+}
+
+/**
  * Управляющий объект игры
  */
 class Game {
@@ -103,7 +116,9 @@ class Game {
         this._Difficulty = Diff;
         this._PlayerName = PlayerName;
         this._Player = null;
-        this._Map = new Map(FieldSize.X, FieldSize.Y);
+        this._GameObjects = new ObjectPool();
+        this._Renderer = new Renderer();
+        this._FrameProcessor = new FrameProcessor();
     }
 
     /**
@@ -111,9 +126,9 @@ class Game {
      */
     Start() {
         if (!this._PauseMarker) {
-            this._GameObjects = MapGenerator.GenerateMap(this._Map.Width, this._Map.Height);
+            this._GameObjects = MapGenerator.GenerateMap(this._Map.Width, this._Map.Height); //TODO: update generator
             this._Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
-            this._GameObjects.push(_Player); //add player to objects
+            this._GameObjects.Players.push(_Player); //add player to objects
             this._Score = 0;
             this._FrameCounter = 0;
         }
@@ -205,7 +220,7 @@ class Game {
         let res = ControlHandler.ApplyAction(event.key, _Player);
         if (res !== undefined) {
             //add new objects to map
-            this._GameObjects.push(res);
+            this._GameObjects.Shells.push(res);
         }
     }
 
@@ -228,54 +243,50 @@ class Game {
      * Обрабатывает все события игры в текущем кадре
      */
     _GameTick() {
-        //clear map, move and add to map, calculate collisions, 
-        //analyze for enemies, render, check for player death
-        this._Map.clear();
-        for (obj in this._GameObjects) {
-            if (obj instanceof MovableObject) {
-                obj.Move();
+        for (obj of this._GameObjects.Players) {
+            obj.Move();
+            if (obj.GetId() != 0) {
+                EnemyAI.Analyze(obj, ObjectPool);
             }
-            this._Map.AppendElement(obj);
+        }
+        for (const obj of this._GameObjects.Shells) {
+            obj.Move();
+        }
+        for (const obj of this._GameObjects.MovableBodies) {
+            obj.Move();
         }
         let GameOver = false;
-        for (obj in this._GameObjects) {
-            if (obj instanceof MovableObject) {
-                CollisionCalculator.CalculateCollision(obj, this._Map);
-            }
-            if (obj instanceof Player) {
-                if (obj.Id != 0) {
-                    EnemyAi.Analyze(this._Map, obj); //call analyze for every enemy
-                    if (obj.GetHP() === 0) {
-                        this._Score += ScoreForOne; //if after analyze enemy still has zero hp => than add score for this enemy
-                    }
-                }
-                else {
-                    if (obj.GetHP() === 0) {
-                        Gameover = true;
-                    }
-                }
-            }
-        } //TODO: Add forces to movable objects
-        this._Despawn(); //clear from output
-        this._GameObjects = this._GameObjects.filter(obj => obj.IsActive()); //remove inactive elements
-        if (this._FrameCounter === SpawnFrameTimeout) {
-            this._SpawnItems();
-            this._FrameCounter = 0;
+        this._FrameProcessor.CalculateFrame(this._GameObjects);
+        if (this._Player.GetHP() === 0) {
+            GameOver = true;
         }
-        this._Render();
-        if (GameOver) {
+        for (const obj of this._GameObjects.Players) {
+            if (obj.GetId() != 0 && !obj.IsActive()) {
+                this._Score += ScoreForOne;
+            }
+        }
+        if (!GameOver) {
+            this._Despawn();
+            if (this._FrameCounter === SpawnFrameTimeout) {
+                this._SpawnItems();
+                this._FrameCounter = 0;
+            }
+            this._Renderer.Render(this._GameObjects);
+            this._FrameProcessor.ResetFrame();
+            this._FrameCounter++;
+        }
+        else {
             this.Stop();
         }
-        this._FrameCounter++;
     }
 
     /**
      * Спавнит новые элементы на карту
      */
-    _SpawnItems() {
-        let CurrentBuffs = this._GameObjects.filter(obj => obj instanceof BuffItem).length;
-        let CurrentEnemies = this._GameObjects.filter(obj => obj instanceof Player).length - 1; //excluding player
-        let CurrentWeapons = this._GameObjects.filter(obj => obj instanceof WeaponItem).length;
+    _SpawnItems() { //TODO: change filter method to loops
+        let CurrentBuffs = this._GameObjects.InvItems.filter(obj => obj instanceof BuffItem).length;
+        let CurrentEnemies = this._GameObjects.Players.length - 1; //excluding player
+        let CurrentWeapons = this._GameObjects.InvItems.filter(obj => obj instanceof WeaponItem).length;
         let BuffsToSpawn;
         let EnemiesToSpawn;
         let WeaponToSpawn;
@@ -305,58 +316,95 @@ class Game {
             MaxHP = MaxEnemyHPNuts;
         }
         for (let i = 0; i < BuffsToSpawn; ++i) {
-            this._GameObjects.push(Spawner.SpawnBuff(this._Map));
+            this._GameObjects.InvItems.push(Spawner.SpawnBuff(this._Map)); //TODO: map replace
         }
         for (let i = 0; i < EnemiesToSpawn; ++i) {
-            this._GameObjects.push(Spawner.SpawnEnemy(this._Map, MaxHP));
+            this._GameObjects.Players.push(Spawner.SpawnEnemy(this._Map, MaxHP));
         }
         for (let i = 0; i < WeaponToSpawn; ++i) {
-            this._GameObjects.push(Spawner.SpawnWeapon(this._Map));
+            this._GameObjects.InvItems.push(Spawner.SpawnWeapon(this._Map));
         }
     }
 
     /**
-     * Удаляет все неактивные элементы с интерфейса пользователя
+     * Удаляет все неактивные элементы с карты
      */
     _Despawn() {
-        let ElementsToRemove = this._GameObjects.filter(obj => !obj.IsActive());
+        //собираем сводку удаляемых элементов
+        let ElementsToRemove = []
+        ElementsToRemove.push(this._GameObjects.Players.filter(obj => !obj.IsActive())); //TODO: perhaps there's a better way?
+        ElementsToRemove.push(this._GameObjects.Shells.filter(obj => !obj.IsActive()));
+        ElementsToRemove.push(this._GameObjects.MovableBodies.filter(obj => !obj.IsActive()));
+        ElementsToRemove.push(this._GameObjects.InvItems.filter(obj => !obj.IsActive()));
         if (ElementsToRemove.length > 0) {
-            for (obj in ElementsToRemove) {
-                let El = document.getElementById(obj.Id);
-                El.parentNode.removeChild(El);
+            for (const obj of ElementsToRemove) {
+                this._Renderer.RemoveElement(obj.GetId());
             }
+        }
+        //удаляем объекты
+        this._GameObjects.Players = this._GameObjects.Players.filter(obj => obj.IsActive()); //remove inactive elements
+        this._GameObjects.Shells = this._GameObjects.Shells.filter(obj => obj.IsActive());
+        this._GameObjects.MovableBodies = this._GameObjects.MovableBodies.filter(obj => obj.IsActive());
+        this._GameObjects.InvItems = this._GameObjects.InvItems.filter(obj => obj.IsActive());
+    }
+}
+
+
+/**
+ * Представляет объект для отображения содержимого карты в интерфейс пользователя
+ */
+class Renderer {
+
+    constructor() {
+        this._PlayArea = document.getElementById(PlayAreaId);
+    }
+
+    /**
+     * Отображает пул объектов в интерфейс пользователя
+     * @param {*} objectpool 
+     */
+    Render(objectpool) {
+        for (const pool of objectpool.Players) {
+            this._RenderPool(poo);
         }
     }
 
     /**
-     * Отображает содержимое карты в интерфейс пользователя
+     * Удаляет элемент с интерфейса пользователя
+     * @param {*} id 
      */
-    _Render() {
-        let PlayArea = document.getElementById(PlayAreaId);
-        for (obj in this._GameObjects) {
-            var element;
-            element = document.getElementById(obj.Id);
-            if (element !== undefined) {
-                element.style.top = obj.Position.Y + "px";
-                element.style.left = obj.Position.X + "px";
-            }
-            else {
-                element = document.createElement('div');
-                element.setAttribute('id', obj.Id);
-                element.setAttribute('class', obj.GetAssetId());
-                if (obj instanceof GameObject) {
-                    element.style.width = obj.GetRadius() + "px";
-                    element.style.height = obj.GetRadius() + "px";
-                    element.style.top = obj.Position.Y + "px";
-                    element.style.left = obj.Position.X + "px";
-                }
-                if (obj instanceof Player) {
-                    element.innerHTML = '<p>' + obj.GetName() + '</p>';
-                }
-                PlayArea.appendChild(element);
-            }
-        }
-
+    RemoveElement(id) {
+        document.getElementById(obj.Id).remove();
     }
 
+    _RenderPool(pool) {
+        for (const obj of pool) {
+            var element = document.getElementById(obj.Id);
+            if (element !== undefined) {
+                this._SetPosition(element, obj.GetPosition());
+            }
+            else {
+                element = this._CreateElement(obj);
+                if (pool instanceof Player) element.innerHTML = '<p>' + obj.GetName() + '</p>'; //not the best solution
+                this._PlayArea.appendChild(element);
+            }
+        }
+    }
+
+    _SetPosition(element, position) {
+        element.style.top = position.Y + "px";
+        element.style.left = position.X + "px";
+    }
+    _CreateElement(obj) {
+        let element = document.createElement('div');
+        element.setAttribute('id', obj.Id);
+        element.setAttribute('class', obj.GetAssetId());
+        if (obj instanceof GameObject) {
+            element.style.width = obj.GetRadius() + "px";
+            element.style.height = obj.GetRadius() + "px";
+            element.style.top = obj.GetPosition().Y + "px";
+            element.style.left = obj.GetPosition().X + "px";
+        }
+        return element
+    }
 }

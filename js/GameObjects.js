@@ -128,6 +128,10 @@ class SpawnableObject {
     IsActive() {
         return this._State;
     }
+
+    Deactivate() {
+        this._State = false;
+    }
 }
 
 /**
@@ -171,10 +175,6 @@ class InventoryItem extends SpawnableObject {
         this.Amount = Amount;
     }
 
-    Deactivate() {
-        this._State = false;
-    }
-
     ActivateItem() {
         throw "InventoryItem - абстрактный класс, следует вызвать метод у потомка"
     }
@@ -201,7 +201,7 @@ class WeaponItem extends InventoryItem {
     ActivateItem(PlayerObj) {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
-            let shell = new Shell(PlayerObj.GetPosition(), this._Radius, this._Mass, this._AssetId, GUID.CreateGuid(), this._Distance, this._Damage);
+            let shell = new Shell(PlayerObj.GetPosition(), this._ShellTemplate.GetRadius(), this._ShellTemplate.GetAssetId(), GUID.CreateGuid(), this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage());
             shell.AddForce(new Force(1, PlayerObj.GetAngle()));
             return shell;
         }
@@ -357,8 +357,6 @@ class Shell extends MovableObject {
             }
         }
     }
-
-
 
     GetMaxDistance() {
         return this._MaxDistance;
