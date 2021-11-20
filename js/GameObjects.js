@@ -256,9 +256,13 @@ class MovableObject extends GameObject {
      * @param {*} AssetId - Сss класс
      * @param {*} Radius - Радиус тела
      * @param {*} Mass - Масса тела
+     * @param {*} MaxY - Максимальная позиция по оси Y
+     * @param {*} MaxX - Максимальная позиция по оси Х
      */
-    constructor(...args) {
-        super(...args);
+    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX) {
+        super(Position, Id, AssetId, Radius, Mass);
+        this._MaxYPos = MaxY;
+        this._MaxXPos = MaxX;
         this._OldPos;
         this._Angle = 0; //угол в градусах, угол в сторону которого движется тело относительно нормали (0-360)
         this._Forces = [];
@@ -293,6 +297,12 @@ class MovableObject extends GameObject {
         if (CalcValue >= 0) {
             this._Angle = CalcValue;
         }
+        //correct coordinates with restrincted maxvalue
+        if (this._Position.X < 0) this._Position.X = MaxX - this._Position.X;
+        if (this._Position.X > MaxX) this._Position.X = this._Position.X - MaxX;
+        if (this._Position.Y < 0) this._Position.Y = MaxY - this._Position.Y;
+        if (this._Position.Y > MaxY) this._Position.Y = this._Position.Y - MaxY;
+
     }
 
     /**

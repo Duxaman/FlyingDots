@@ -1,4 +1,4 @@
-class Spawner {
+class Spawner { //TODO: update
     static DefaultNames = ["Titananderson", "Burnsshimmer", "Thudhes", "Evansano", "Hawkiniel", "Crookedsmi",
         "Pontison", "Dunntrosity", "Ariwis", "Vitek", "Lina", "Mansteinia", "Twinkleckson", "Antiby", "Winabla", "Heropogo",
         "Bailas", "Fornrres", "Mashrson", "Watsonbow", "Gardnereth", "Antirees", "Lobstrosmorrison", "Toralka", "Olale",
