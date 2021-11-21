@@ -1,26 +1,11 @@
-class Spawner { //TODO: update
+class Spawner {
     static DefaultNames = ["Titananderson", "Burnsshimmer", "Thudhes", "Evansano", "Hawkiniel", "Crookedsmi",
         "Pontison", "Dunntrosity", "Ariwis", "Vitek", "Lina", "Mansteinia", "Twinkleckson", "Antiby", "Winabla", "Heropogo",
         "Bailas", "Fornrres", "Mashrson", "Watsonbow", "Gardnereth", "Antirees", "Lobstrosmorrison", "Toralka", "Olale",
         "Abalham", "Hammashmed", "Wickedson", "Patestat", "Johnpuffn", "Edwarvin", "Battlegreene"];
 
-    static _DetermineSpawnPoint(Map) {
-        var pointfound = false;
-        while (!pointfound) {
-            let x = Randomizer.GetRandomInt(0, Map.Width);
-            let y = Randomizer.GetRandomInt(0, Map.Height);
-            let MapPoint = Map.GetElement(x, y);
-            if (MapPoint !== undefined) {
-                if (MapPoint.length === 0) //only spawn if there is nothing at this point
-                {
-                    return new Point(x, y);
-                }
-            }
-            else {
-                pointfound = true;
-            }
-        }
-        return new Point(x, y);
+    static _DetermineSpawnPoint() {
+        return new Point(Randomizer.GetRandomInt(0, Map.Width), Randomizer.GetRandomInt(0, Map.Height));
     }
 
     static _ConstructBuff(MapPoint) {
@@ -55,13 +40,13 @@ class Spawner { //TODO: update
         return new Player(MapPoint, ID, Asset, Radius, Mass, Name, MaxHp);
     }
 
-    static SpawnBuff(Map) {
-        return this._ConstructBuff(this._DetermineSpawnPoint(Map));
+    static SpawnBuff() {            //spawn at any point, collisions will be resolved anyway
+        return this._ConstructBuff(this._DetermineSpawnPoint());
     }
-    static SpawnWeapon(Map) {
-        return this._ConstructWeapon(this._DetermineSpawnPoint(Map));
+    static SpawnWeapon() {
+        return this._ConstructWeapon(this._DetermineSpawnPoint());
     }
-    static SpawnEnemy(Map, MaxHp) {
-        return this._ConstructEnemy(this._DetermineSpawnPoint(Map), MaxHp);
+    static SpawnEnemy(MaxHp) {
+        return this._ConstructEnemy(this._DetermineSpawnPoint(), MaxHp);
     }
 }

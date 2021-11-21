@@ -114,9 +114,12 @@ class Game {
          * Текущая сложность игры
          */
         this._Difficulty = Diff;
+        /**
+         * Размер игрового поля
+         */
+        this._FieldSize = FieldSize;
         this._PlayerName = PlayerName;
         this._Player = null;
-        this._GameObjects = new ObjectPool();
         this._Renderer = new Renderer();
     }
 
@@ -125,7 +128,7 @@ class Game {
      */
     Start() {
         if (!this._PauseMarker) {
-            this._GameObjects = MapGenerator.GenerateMap(this._Map.Width, this._Map.Height); //TODO: update generator
+            this._GameObjects = MapGenerator.GenerateMap(this._FieldSize);
             this._Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
             this._GameObjects.Players.push(_Player); //add player to objects
             this._Score = 0;
@@ -314,13 +317,13 @@ class Game {
             MaxHP = MaxEnemyHPNuts;
         }
         for (let i = 0; i < BuffsToSpawn; ++i) {
-            this._GameObjects.InvItems.push(Spawner.SpawnBuff(this._Map)); //TODO: map replace
+            this._GameObjects.InvItems.push(Spawner.SpawnBuff());
         }
         for (let i = 0; i < EnemiesToSpawn; ++i) {
-            this._GameObjects.Players.push(Spawner.SpawnEnemy(this._Map, MaxHP));
+            this._GameObjects.Players.push(Spawner.SpawnEnemy(MaxHP));
         }
         for (let i = 0; i < WeaponToSpawn; ++i) {
-            this._GameObjects.InvItems.push(Spawner.SpawnWeapon(this._Map));
+            this._GameObjects.InvItems.push(Spawner.SpawnWeapon());
         }
     }
 
