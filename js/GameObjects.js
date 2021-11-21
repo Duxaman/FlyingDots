@@ -312,8 +312,11 @@ class MovableObject extends GameObject {
         this._Forces = [];
     }
 
-    Teleport(NewPosition) {
-        this._Position = Position;
+    /**
+     * Возвращает тело на его предыдущую позицию
+     */
+    Revert() {
+        this._Position = this._OldPos;
     }
 
     GetAngle() {

@@ -118,7 +118,6 @@ class Game {
         this._Player = null;
         this._GameObjects = new ObjectPool();
         this._Renderer = new Renderer();
-        this._FrameProcessor = new FrameProcessor();
     }
 
     /**
@@ -252,11 +251,11 @@ class Game {
         for (const obj of this._GameObjects.Shells) {
             obj.Move();
         }
-        for (const obj of this._GameObjects.MovableBodies) {
+        for (const obj of this._GameObjects.MovableBodies) { //TODO: add forces to mov bodies
             obj.Move();
         }
         let GameOver = false;
-        this._FrameProcessor.CalculateFrame(this._GameObjects);
+        FrameProcessor.CalculateFrame(this._GameObjects);
         if (this._Player.GetHP() === 0) {
             GameOver = true;
         }
@@ -272,7 +271,6 @@ class Game {
                 this._FrameCounter = 0;
             }
             this._Renderer.Render(this._GameObjects);
-            this._FrameProcessor.ResetFrame();
             this._FrameCounter++;
         }
         else {
