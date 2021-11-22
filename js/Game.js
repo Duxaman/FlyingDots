@@ -11,6 +11,7 @@ const Difficulty =
  */
 class ObjectPool {
     constructor() {
+        this.Player = null;
         this.Players = [];
         this.Shells = [];
         this.StaticBodies = [];
@@ -62,7 +63,11 @@ class Game {
         /**
          * Счетчик обновлений карты, необходимый для спавна
          */
-        this._FrameCounter = 0;
+        this._SpawnFrameCounter = 0;
+        /**
+        * Счетчик обновлений карты, необходимый для атак ИИ противника
+        */
+        this._EnemyAttackFrameCounter = 0;
         /**
          * Хранилище всех игровых объектов
          */
@@ -76,7 +81,6 @@ class Game {
          */
         this._FieldSize = FieldSize;
         this._PlayerName = PlayerName;
-        this._Player = null;
         this._Renderer = new Renderer();
     }
 
@@ -86,10 +90,10 @@ class Game {
     Start() {
         if (!this._PauseMarker) {
             this._GameObjects = MapGenerator.GenerateMap(this._FieldSize);
-            this._Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
-            this._GameObjects.Players.push(_Player); //add player to objects
+            this.GameObject.Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
+            this._GameObjects.Players.push(this.GameObject.Player); //add player to objects
             this._Score = 0;
-            this._FrameCounter = 0;
+            this._SpawnFrameCounter = 0;
         }
         else {
             this._PauseMarker = false;
@@ -156,7 +160,7 @@ class Game {
      * Возвращает массив с текущем HP игрока и его максимумом
      */
     GetPlayerStat() {
-        return [this._Player.GetHP(), this._Player.GetMaxHP()]
+        return [this._GameObjects.Player.GetHP(), this._GameObjects.Player.GetMaxHP()]
     }
 
     /**
@@ -164,8 +168,8 @@ class Game {
      */
     GetInvStat() {
         let res = []
-        for (let i = 0; i < this._Player.Inventory.Count(); ++i) {
-            let val = this._Player.Inventory.GetItemAt(i);
+        for (let i = 0; i < this._GameObjects.Player.Inventory.Count(); ++i) {
+            let val = this._GameObjects.Player.Inventory.GetItemAt(i);
             res.push([val.GetAssetId(), val.Amount]);
         }
         return res;
@@ -179,30 +183,30 @@ class Game {
         let res;
         switch (event.key) {
             case '1':
-                this._Player.Inventory.SelectItem(0);
+                this._GameObjects.Player.Inventory.SelectItem(0);
                 break;
             case '2':
-                this._Player.Inventory.SelectItem(1);
+                this._GameObjects.Player.Inventory.SelectItem(1);
                 break;
             case '3':
-                this._Player.Inventory.SelectItem(2);
+                this._GameObjects.Player.Inventory.SelectItem(2);
                 break;
             case '4':
-                this._Player.Inventory.SelectItem(3);
+                this._GameObjects.Player.Inventory.SelectItem(3);
                 break;
             case 'f':
-                res = this._Player.Inventory.ActivateItem(this._Player);
+                res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player);
             case 'w':
-                this._Player.AddForce(new Force(BaseAcceleration, 270));
+                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 270));
                 break;
             case 's':
-                this._Player.AddForce(new Force(BaseAcceleration, 90));
+                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 90));
                 break;
             case 'a':
-                this._Player.AddForce(new Force(BaseAcceleration, 180));
+                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 180));
                 break;
             case 'd':
-                this._Player.AddForce(new Force(BaseAcceleration, 0));
+                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 0));
                 break;
             default: break;
         }
@@ -234,7 +238,13 @@ class Game {
         for (obj of this._GameObjects.Players) {
             obj.Move();
             if (obj.GetId() != 0) {
-                EnemyAI.Analyze(obj, ObjectPool);
+                if (this._EnemyAttackFrameCounter === AttackFrameTimeout) {
+                    EnemyAI.Analyze(obj, this._GameObjects, true);
+                    this._EnemyAttackFrameCounter = 0;
+                }
+                else {
+                    EnemyAI.Analyze(obj, this._GameObjects, false);
+                }
             }
         }
         for (const obj of this._GameObjects.Shells) {
@@ -246,7 +256,7 @@ class Game {
         }
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
-        if (this._Player.GetHP() === 0) {
+        if (this._GameObjects.Player.GetHP() === 0) {
             GameOver = true;
         }
         for (const obj of this._GameObjects.Players) {
@@ -256,12 +266,12 @@ class Game {
         }
         if (!GameOver) {
             this._Despawn();
-            if (this._FrameCounter === SpawnFrameTimeout) {
+            if (this._SpawnFrameCounter === SpawnFrameTimeout) {
                 this._SpawnItems();
-                this._FrameCounter = 0;
+                this._SpawnFrameCounter = 0;
             }
             this._Renderer.Render(this._GameObjects);
-            this._FrameCounter++;
+            this._SpawnFrameCounter++;
         }
         else {
             this.Stop();

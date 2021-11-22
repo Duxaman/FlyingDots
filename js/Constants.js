@@ -2,7 +2,7 @@ const PlayAreaId = "workplace";
 const ScoreForOne = 100;
 const FrameInterval = 35;
 const SpawnFrameTimeout = 300;
-const CollisionSensitivity = 5;
+const AttackFrameTimeout = 500;
 const MovableBodyForcesLimit = 20;
 const Friction = 0.0008
 const BaseRadius = 30;
@@ -15,6 +15,7 @@ const BaseDamage = 4;
 const BaseDistance = 300;
 const MaxStaticBodiesPerMap = 15;
 const MaxMovableBodiesPerMap = 5;
+const EnemyVisionRange = 500;
 
 /**
  * Difficulty settings
