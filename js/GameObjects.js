@@ -63,9 +63,9 @@ class Point {
     }
 
     /**
-     * Возвращает угол в градусах между двумя векторами относительно нормали
-     * @param {*} VecAPoint - Координата первого вектора
-     * @param {*} VecBPoint - Координата второго вектора
+     * Возвращает угол в градусах между вектором и нормалью
+     * @param {*} VecAPoint - Координата начала вектора
+     * @param {*} VecBPoint - Координата конца вектора
      */
     static VectorNormalAngle(VecAPoint, VecBPoint) {
         var den = Point.Distance(VecAPoint, VecBPoint);
@@ -316,7 +316,17 @@ class MovableObject extends GameObject {
      * Возвращает тело на его предыдущую позицию
      */
     Revert() {
-        this._Position = this._OldPos;
+        if (this._OldPos !== undefined) {
+            this._Position = this._OldPos;
+        }
+        else {
+            if (this._Position.X - this._Radius >= 0) {
+                this._Position.X = this._Position.X - this._Radius;
+            }
+            else {
+                this._Position.X = this._Position.X + this._Radius;
+            }
+        }
     }
 
     GetAngle() {
