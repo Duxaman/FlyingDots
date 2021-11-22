@@ -7,49 +7,6 @@ const Difficulty =
 }
 
 /**
- * Адаптер управления игроками
- */
-class ControlHandler {
-    /**
-     * Применяет действие Action к игроку Player
-     * @param {*} Action - символ задающий определенное действие
-     * @param {*} Player - игрок по отношении к которому применяется данное действие
-     * @returns 
-     */
-    static ApplyAction(Action, Player) {
-        switch (Action) {
-            case '1':
-                Player.Inventory.SelectItem(0);
-                break;
-            case '2':
-                Player.Inventory.SelectItem(1);
-                break;
-            case '3':
-                Player.Inventory.SelectItem(2);
-                break;
-            case '4':
-                Player.Inventory.SelectItem(3);
-                break;
-            case 'f':
-                return Player.Inventory.ActivateItem(Player);
-            case 'w':
-                Player.AddForce(new Force(BaseAcceleration, 270));
-                break;
-            case 's':
-                Player.AddForce(new Force(BaseAcceleration, 90));
-                break;
-            case 'a':
-                Player.AddForce(new Force(BaseAcceleration, 180));
-                break;
-            case 'd':
-                Player.AddForce(new Force(BaseAcceleration, 0));
-                break;
-            default: break;
-        }
-    }
-}
-
-/**
  * Представляет хранилище всех игровых объектов
  */
 class ObjectPool {
@@ -219,7 +176,36 @@ class Game {
      * @param {*} event - событие keydown
      */
     _HandlePlayerMovement(event) {
-        let res = ControlHandler.ApplyAction(event.key, _Player);
+        let res;
+        switch (event.key) {
+            case '1':
+                this._Player.Inventory.SelectItem(0);
+                break;
+            case '2':
+                this._Player.Inventory.SelectItem(1);
+                break;
+            case '3':
+                this._Player.Inventory.SelectItem(2);
+                break;
+            case '4':
+                this._Player.Inventory.SelectItem(3);
+                break;
+            case 'f':
+                res = this._Player.Inventory.ActivateItem(this._Player);
+            case 'w':
+                this._Player.AddForce(new Force(BaseAcceleration, 270));
+                break;
+            case 's':
+                this._Player.AddForce(new Force(BaseAcceleration, 90));
+                break;
+            case 'a':
+                this._Player.AddForce(new Force(BaseAcceleration, 180));
+                break;
+            case 'd':
+                this._Player.AddForce(new Force(BaseAcceleration, 0));
+                break;
+            default: break;
+        }
         if (res !== undefined) {
             //add new objects to map
             this._GameObjects.Shells.push(res);
@@ -254,8 +240,9 @@ class Game {
         for (const obj of this._GameObjects.Shells) {
             obj.Move();
         }
-        for (const obj of this._GameObjects.MovableBodies) { //TODO: add forces to mov bodies
+        for (const obj of this._GameObjects.MovableBodies) {
             obj.Move();
+            obj.AddForce(new Force(BaseAcceleration, Randomizer.GetRandomInt(0, 360)));
         }
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
