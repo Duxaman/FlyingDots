@@ -71,7 +71,7 @@ class Game {
         /**
          * Хранилище всех игровых объектов
          */
-        this._GameObjects = [];
+        this._GameObjects = null;
         /**
          * Текущая сложность игры
          */
@@ -90,8 +90,8 @@ class Game {
     Start() {
         if (!this._PauseMarker) {
             this._GameObjects = MapGenerator.GenerateMap(this._FieldSize);
-            this.GameObject.Player = new Player(new Point(10, 10), 0, AssetId.Player, BaseRadius, BaseMass, this._PlayerName, BaseMaxHP);
-            this._GameObjects.Players.push(this.GameObject.Player); //add player to objects
+            this._GameObjects.Player = new Player(new Point(10, 10), 0, AssetId.Players.Player, BaseRadius, BaseMass, this._FieldSize.Y, this._FieldSize.X, this._PlayerName, BaseMaxHP);
+            this._GameObjects.Players.push(this._GameObjects.Player); //add player to objects
             this._Score = 0;
             this._SpawnFrameCounter = 0;
         }
@@ -99,8 +99,8 @@ class Game {
             this._PauseMarker = false;
         }
         this._StartTime = performance.now(); // write startgame time
-        this._FrameTimer = setInterval(this._GameTick, FrameInterval);
-        window.addEventListener('keydown', _HandlePlayerMovement); //watch player movements
+        this._FrameTimer = setInterval(() => this._GameTick(), FrameInterval);
+        window.addEventListener('keydown', (event) => this._HandlePlayerMovement(event)); //watch player movements
     }
 
     /**
@@ -125,12 +125,12 @@ class Game {
      * Возвращает строку содержащую время прошедшее от начала игры в формате m:s
      */
     GetTime() {
-        var diff;
+        let diff;
         if (this._SavedTime === null) {
-            let diff = performance.now() - this._StartTime;
+            diff = performance.now() - this._StartTime;
         }
         else {
-            let diff = performance.now() - this._SavedTime;
+            diff = performance.now() - this._SavedTime;
         }
         let sec = Math.floor(diff / 1000);
         let hrs = Math.floor(sec / 3600);
@@ -235,7 +235,7 @@ class Game {
      * Обрабатывает все события игры в текущем кадре
      */
     _GameTick() {
-        for (obj of this._GameObjects.Players) {
+        for (let obj of this._GameObjects.Players) {
             obj.Move();
             if (obj.GetId() != 0) {
                 if (this._EnemyAttackFrameCounter === AttackFrameTimeout) {
@@ -328,17 +328,11 @@ class Game {
      * Удаляет все неактивные элементы с карты
      */
     _Despawn() {
-        //собираем сводку удаляемых элементов
-        let ElementsToRemove = []
-        ElementsToRemove.push(this._GameObjects.Players.filter(obj => !obj.IsActive())); //TODO: perhaps there's a better way?
-        ElementsToRemove.push(this._GameObjects.Shells.filter(obj => !obj.IsActive()));
-        ElementsToRemove.push(this._GameObjects.MovableBodies.filter(obj => !obj.IsActive()));
-        ElementsToRemove.push(this._GameObjects.InvItems.filter(obj => !obj.IsActive()));
-        if (ElementsToRemove.length > 0) {
-            for (const obj of ElementsToRemove) {
-                this._Renderer.RemoveElement(obj.GetId());
-            }
-        }
+        //удаляем элементы
+        this._Renderer.RemoveElements(this._GameObjects.Players.filter(obj => !obj.IsActive())); //TODO: perhaps there's a better way?
+        this._Renderer.RemoveElements(this._GameObjects.Shells.filter(obj => !obj.IsActive()));
+        this._Renderer.RemoveElements(this._GameObjects.MovableBodies.filter(obj => !obj.IsActive()));
+        this._Renderer.RemoveElements(this._GameObjects.InvItems.filter(obj => !obj.IsActive()));
         //удаляем объекты
         this._GameObjects.Players = this._GameObjects.Players.filter(obj => obj.IsActive()); //remove inactive elements
         this._GameObjects.Shells = this._GameObjects.Shells.filter(obj => obj.IsActive());
@@ -362,28 +356,32 @@ class Renderer {
      * @param {*} objectpool 
      */
     Render(objectpool) {
-        for (const pool of objectpool.Players) {
-            this._RenderPool(poo);
-        }
+        this._RenderPool(objectpool.Players);
+        this._RenderPool(objectpool.Shells);
+        this._RenderPool(objectpool.InvItems);
+        this._RenderPool(objectpool.StaticBodies);
+        this._RenderPool(objectpool.MovableBodies);
     }
 
     /**
-     * Удаляет элемент с интерфейса пользователя
-     * @param {*} id 
+     * Удаляет элементы с интерфейса пользователя
+     * @param {*} array - массив элементов игры
      */
-    RemoveElement(id) {
-        document.getElementById(obj.Id).remove();
+    RemoveElements(array) {
+        for (const obj of array) {
+            document.getElementById(obj.GetId()).remove();
+        }
     }
 
     _RenderPool(pool) {
         for (const obj of pool) {
-            var element = document.getElementById(obj.Id);
-            if (element !== undefined) {
+            var element = document.getElementById(obj.GetId());
+            if (element !== null) {
                 this._SetPosition(element, obj.GetPosition());
             }
             else {
                 element = this._CreateElement(obj);
-                if (pool instanceof Player) element.innerHTML = '<p>' + obj.GetName() + '</p>'; //not the best solution
+                if (obj instanceof Player) element.innerHTML = '<p>' + obj.GetName() + ' (' + obj.GetHP() + ')</p>'; //not the best solution
                 this._PlayArea.appendChild(element);
             }
         }
@@ -395,7 +393,7 @@ class Renderer {
     }
     _CreateElement(obj) {
         let element = document.createElement('div');
-        element.setAttribute('id', obj.Id);
+        element.setAttribute('id', obj.GetId());
         element.setAttribute('class', obj.GetAssetId());
         if (obj instanceof GameObject) {
             element.style.width = obj.GetRadius() + "px";

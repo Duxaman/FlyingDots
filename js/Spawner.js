@@ -4,8 +4,8 @@ class Spawner {
         "Bailas", "Fornrres", "Mashrson", "Watsonbow", "Gardnereth", "Antirees", "Lobstrosmorrison", "Toralka", "Olale",
         "Abalham", "Hammashmed", "Wickedson", "Patestat", "Johnpuffn", "Edwarvin", "Battlegreene"];
 
-    static _DetermineSpawnPoint() {
-        return new Point(Randomizer.GetRandomInt(0, Map.Width), Randomizer.GetRandomInt(0, Map.Height));
+    static _DetermineSpawnPoint(mapsize) {
+        return new Point(Randomizer.GetRandomInt(0, mapsize.X), Randomizer.GetRandomInt(0, mapsize.Y));
     }
 
     static _ConstructBuff(MapPoint) {
@@ -31,22 +31,22 @@ class Spawner {
         return new WeaponItem(MapPoint, GUID.CreateGuid(), Asset, Randomizer.GetRandomInt(1, 100), ShellTemplate);
     }
 
-    static _ConstructEnemy(MapPoint, MaxHp) {
+    static _ConstructEnemy(MapPoint, MaxHp, mapsize) {
         let Asset = AssetId.Players.Enemy;
         let Radius = BaseRadius;
         let Mass = BaseMass;
         let Name = this.DefaultNames[Randomizer.GetRandomInt(1, this.DefaultNames.length)];
         let ID = GUID.CreateGuid();
-        return new Player(MapPoint, ID, Asset, Radius, Mass, Name, MaxHp);
+        return new Player(MapPoint, ID, Asset, Radius, Mass, mapsize.Y, mapsize.X, Name, MaxHp);
     }
 
-    static SpawnBuff() {            //spawn at any point, collisions will be resolved anyway
-        return this._ConstructBuff(this._DetermineSpawnPoint());
+    static SpawnBuff(mapsize) {            //spawn at any point, collisions will be resolved anyway
+        return this._ConstructBuff(this._DetermineSpawnPoint(mapsize));
     }
-    static SpawnWeapon() {
-        return this._ConstructWeapon(this._DetermineSpawnPoint());
+    static SpawnWeapon(mapsize) {
+        return this._ConstructWeapon(this._DetermineSpawnPoint(mapsize));
     }
-    static SpawnEnemy(MaxHp) {
-        return this._ConstructEnemy(this._DetermineSpawnPoint(), MaxHp);
+    static SpawnEnemy(MaxHp, mapsize) {
+        return this._ConstructEnemy(this._DetermineSpawnPoint(mapsize), MaxHp, mapsize);
     }
 }

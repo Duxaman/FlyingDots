@@ -13,27 +13,27 @@ class FrameProcessor {
             for (let j = 0; j < len; ++j) {
                 if (j <= i) continue;
                 if (this._IsReachable(objectpool.Players[i], objectpool.Players[j])) {
-                    _ApplyPlayerPlayerCollision(objectpool.Players[i], objectpool.Players[j]);
+                    this._ApplyPlayerPlayerCollision(objectpool.Players[i], objectpool.Players[j]);
                 }
             }
             for (let j = 0; j < len2; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.Shells[j])) {
-                    _ApplyPlayerShellCollision(objectpool.Players[i], objectpool.Shells[j]);
+                    this._ApplyPlayerShellCollision(objectpool.Players[i], objectpool.Shells[j]);
                 }
             }
             for (let j = 0; j < len3; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.InvItems[j])) {
-                    _ApplyPlayerInventoryItemCollision(objectpool.Players[i], objectpool.InvItems[j]);
+                    this._ApplyPlayerInventoryItemCollision(objectpool.Players[i], objectpool.InvItems[j]);
                 }
             }
             for (let j = 0; j < len4; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.StaticBodies[j])) {
-                    _ApplyPlayerStaticBodyItemCollision(objectpool.Players[i]);
+                    this._ApplyPlayerStaticBodyItemCollision(objectpool.Players[i]);
                 }
             }
             for (let j = 0; j < len5; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.MovableBodies[j])) {
-                    _ApplyPlayerMovableBodyItemCollision(objectpool.Players[i]);
+                    this._ApplyPlayerMovableBodyItemCollision(objectpool.Players[i]);
                 }
             }
         }  //mov bodies + shells
@@ -52,10 +52,11 @@ class FrameProcessor {
             }
     }
 
-    static _IsReachable(Obj1, Obj1) {
+    static _IsReachable(Obj1, Obj2) {
         let r = Obj1.GetRadius() + Obj2.GetRadius();
         r *= r;
-        return r < Math.pow(Obj1.GetPosition().X + Obj2.GetPosition().X, 2) + Math.pow(Obj1.GetPosition().Y + Obj2.GetPosition().Y, 2);
+        return r < Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
+        //return r < Math.pow(Obj1.GetPosition().X + Obj2.GetPosition().X, 2) + Math.pow(Obj1.GetPosition().Y + Obj2.GetPosition().Y, 2);
     }
 
     static _ApplyPlayerPlayerCollision(player1, player2) {

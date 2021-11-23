@@ -201,7 +201,9 @@ class WeaponItem extends InventoryItem {
     ActivateItem(PlayerObj) {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
-            let shell = new Shell(PlayerObj.GetPosition(), this._ShellTemplate.GetRadius(), this._ShellTemplate.GetAssetId(), GUID.CreateGuid(), this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage());
+            let shell = new Shell(PlayerObj.GetPosition(), GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
+                this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), this._ShellTemplate.MaxYPos, this._ShellTemplate.MaxXPos,
+                this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage());
             shell.AddForce(new Force(1, PlayerObj.GetAngle()));
             return shell;
         }
@@ -261,8 +263,8 @@ class MovableObject extends GameObject {
      */
     constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX) {
         super(Position, Id, AssetId, Radius, Mass);
-        this._MaxYPos = MaxY;
-        this._MaxXPos = MaxX;
+        this.MaxYPos = MaxY;
+        this.MaxXPos = MaxX;
         this._OldPos;
         this._Angle = 0; //угол в градусах, угол в сторону которого движется тело относительно нормали (0-360)
         this._Forces = [];
@@ -298,10 +300,10 @@ class MovableObject extends GameObject {
             this._Angle = CalcValue;
         }
         //correct coordinates with restrincted maxvalue
-        if (this._Position.X < 0) this._Position.X = MaxX - this._Position.X;
-        if (this._Position.X > MaxX) this._Position.X = this._Position.X - MaxX;
-        if (this._Position.Y < 0) this._Position.Y = MaxY - this._Position.Y;
-        if (this._Position.Y > MaxY) this._Position.Y = this._Position.Y - MaxY;
+        if (this._Position.X < 0) this._Position.X = this.MaxXPos - this._Position.X;
+        if (this._Position.X > this.MaxXPos) this._Position.X = this._Position.X - this.MaxXPos;
+        if (this._Position.Y < 0) this._Position.Y = this._MaxYPos - this._Position.Y;
+        if (this._Position.Y > this.MaxYPos) this._Position.Y = this._Position.Y - this.MaxYPos;
 
     }
 
@@ -349,8 +351,8 @@ class Shell extends MovableObject {
      * @param {*} MaxDistance - Максимальная дистанция полета снаряда
      * @param {*} Damage - Урон от снаряда
      */
-    constructor(Position, Id, AssetId, Radius, Mass, MaxDistance, Damage) {
-        super(Position, Id, AssetId, Radius, Mass);
+    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, MaxDistance, Damage) {
+        super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX);
         this._MaxDistance = MaxDistance;
         this._CurrentDistance = 0;
         this._Damage = Damage;
@@ -404,8 +406,8 @@ class Player extends MovableObject {
      * @param {*} Name 
      * @param {*} MaxHP 
      */
-    constructor(Position, Id, AssetId, Radius, Mass, Name, MaxHP) {
-        super(Position, Id, AssetId, Radius, Mass);
+    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP) {
+        super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX);
         this._Name = Name;
         this._Health = MaxHP;
         this._MaxHP = MaxHP;
@@ -420,8 +422,8 @@ class Player extends MovableObject {
         return this._Health;
     }
 
-    GetMaxHp() {
-        return _MaxHP;
+    GetMaxHP() {
+        return this._MaxHP;
     }
 
     ModifyHP(hp) {
