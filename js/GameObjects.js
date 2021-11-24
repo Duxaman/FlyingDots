@@ -331,7 +331,7 @@ class MovableObject extends GameObject {
         //correct coordinates with restrincted maxvalue
         if (this._Position.X < 0) this._Position.X = this.MaxXPos - this._Position.X;
         if (this._Position.X > this.MaxXPos) this._Position.X = this._Position.X - this.MaxXPos;
-        if (this._Position.Y < 0) this._Position.Y = this._MaxYPos - this._Position.Y;
+        if (this._Position.Y < 0) this._Position.Y = this.MaxYPos - this._Position.Y;
         if (this._Position.Y > this.MaxYPos) this._Position.Y = this._Position.Y - this.MaxYPos;
 
     }

@@ -377,7 +377,7 @@ class Renderer {
         for (const obj of pool) {
             var element = document.getElementById(obj.GetId());
             if (element !== null) {
-                this._SetPosition(element, obj.GetPosition());
+                this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
             }
             else {
                 element = this._CreateElement(obj);
@@ -387,16 +387,15 @@ class Renderer {
         }
     }
 
-    _SetPosition(element, position) {
-        element.style.top = position.Y + "px";
-        element.style.left = position.X + "px";
+    _SetPosition(element, position, radius) {
+        element.style.top = position.Y - radius + "px";
+        element.style.left = position.X - radius + "px";
     }
     _CreateElement(obj) {
         let element = document.createElement('div');
         element.setAttribute('id', obj.GetId());
         element.setAttribute('class', obj.GetAssetId());
-        element.style.top = obj.GetPosition().Y + "px";
-        element.style.left = obj.GetPosition().X + "px";
+        this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
         if (obj instanceof GameObject) {
             element.style.width = obj.GetRadius() * 2 + "px";
             element.style.height = obj.GetRadius() * 2 + "px";
