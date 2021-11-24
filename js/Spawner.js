@@ -17,15 +17,15 @@ class Spawner {
         var ShellTemplate;
         var Asset;
         if (buff_type === 0) {
-            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.LiteWeaponShell, BaseShellRadius, BaseShellMass, MaxDistance, BaseDamage);
+            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.LiteWeaponShell, BaseShellRadius, BaseShellMass, 0, 0, ShellMaxDistance, BaseDamage);
             Asset = AssetId.UI.LiteWeaponUI;
         }
         if (buff_type === 1) {
-            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.FireWeaponShell, BaseShellRadius * 2, BaseShellMass * 2, MaxDistance * 2, BaseDamage * 3);
+            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.FireWeaponShell, BaseShellRadius * 2, BaseShellMass * 2, 0, 0, ShellMaxDistance * 2, BaseDamage * 3);
             Asset = AssetId.UI.FireWeaponUI;
         }
         else {
-            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.BibaWeaponShell, BaseShellRadius * 15, BaseShellMass * 3, MaxDistance * 3, -5);
+            ShellTemplate = new Shell(MapPoint, GUID.CreateGuid(), AssetId.Shells.BibaWeaponShell, BaseShellRadius * 15, BaseShellMass * 3, 0, 0, ShellMaxDistance * 3, -5);
             Asset = AssetId.UI.BibaWeaponUI;
         }
         return new WeaponItem(MapPoint, GUID.CreateGuid(), Asset, Randomizer.GetRandomInt(1, 100), ShellTemplate);

@@ -54,9 +54,7 @@ class FrameProcessor {
 
     static _IsReachable(Obj1, Obj2) {
         let r = Obj1.GetRadius() + Obj2.GetRadius();
-        r *= r;
-        return r < Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
-        //return r < Math.pow(Obj1.GetPosition().X + Obj2.GetPosition().X, 2) + Math.pow(Obj1.GetPosition().Y + Obj2.GetPosition().Y, 2);
+        return r >= Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
     }
 
     static _ApplyPlayerPlayerCollision(player1, player2) {

@@ -252,7 +252,7 @@ class Game {
         }
         for (const obj of this._GameObjects.MovableBodies) {
             obj.Move();
-            obj.AddForce(new Force(BaseAcceleration, Randomizer.GetRandomInt(0, 360)));
+            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), 90)));
         }
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
@@ -294,33 +294,33 @@ class Game {
             EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyEasy - CurrentEnemies);
             WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountEasy - CurrentWeapons);
             MaxHP = MaxEnemyHPEasy;
-        }
-        if (this._Difficulty === Difficulty.Medium) {
-            BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountMedium - CurrentBuffs);
-            EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyMedium - CurrentEnemies);
-            WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountMedium - CurrentWeapons);
-            MaxHP = MaxEnemyHPMedium;
-        }
-        if (this._Difficulty === Difficulty.Hard) {
-            BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountHard - CurrentBuffs);
-            EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyHard - CurrentEnemies);
-            WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountHard - CurrentWeapons);
-            MaxHP = MaxEnemyHPHard;
-        }
-        if (this._Difficulty === Difficulty.Nuts) {
-            BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountNuts - CurrentBuffs);
-            EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyNuts - CurrentEnemies);
-            WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountNuts - CurrentWeapons);
-            MaxHP = MaxEnemyHPNuts;
-        }
+        } else
+            if (this._Difficulty === Difficulty.Medium) {
+                BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountMedium - CurrentBuffs);
+                EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyMedium - CurrentEnemies);
+                WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountMedium - CurrentWeapons);
+                MaxHP = MaxEnemyHPMedium;
+            } else
+                if (this._Difficulty === Difficulty.Hard) {
+                    BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountHard - CurrentBuffs);
+                    EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyHard - CurrentEnemies);
+                    WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountHard - CurrentWeapons);
+                    MaxHP = MaxEnemyHPHard;
+                } else
+                    if (this._Difficulty === Difficulty.Nuts) {
+                        BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountNuts - CurrentBuffs);
+                        EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyNuts - CurrentEnemies);
+                        WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountNuts - CurrentWeapons);
+                        MaxHP = MaxEnemyHPNuts;
+                    }
         for (let i = 0; i < BuffsToSpawn; ++i) {
-            this._GameObjects.InvItems.push(Spawner.SpawnBuff());
+            this._GameObjects.InvItems.push(Spawner.SpawnBuff(this._FieldSize));
         }
         for (let i = 0; i < EnemiesToSpawn; ++i) {
-            this._GameObjects.Players.push(Spawner.SpawnEnemy(MaxHP));
+            this._GameObjects.Players.push(Spawner.SpawnEnemy(MaxHP, this._FieldSize));
         }
         for (let i = 0; i < WeaponToSpawn; ++i) {
-            this._GameObjects.InvItems.push(Spawner.SpawnWeapon());
+            this._GameObjects.InvItems.push(Spawner.SpawnWeapon(this._FieldSize));
         }
     }
 
@@ -395,11 +395,11 @@ class Renderer {
         let element = document.createElement('div');
         element.setAttribute('id', obj.GetId());
         element.setAttribute('class', obj.GetAssetId());
+        element.style.top = obj.GetPosition().Y + "px";
+        element.style.left = obj.GetPosition().X + "px";
         if (obj instanceof GameObject) {
-            element.style.width = obj.GetRadius() + "px";
-            element.style.height = obj.GetRadius() + "px";
-            element.style.top = obj.GetPosition().Y + "px";
-            element.style.left = obj.GetPosition().X + "px";
+            element.style.width = obj.GetRadius() * 2 + "px";
+            element.style.height = obj.GetRadius() * 2 + "px";
         }
         return element
     }

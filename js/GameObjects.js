@@ -41,10 +41,30 @@ class GUID {
 }
 
 class Randomizer {
+    /**
+     * Возвращает число распределенное по равномерному закону распределения
+     * @param {*} min 
+     * @param {*} max 
+     * @returns 
+     */
     static GetRandomInt(min, max) {
-        min = Math.ceil(min);
-        max = Math.floor(max);
         return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    /**
+     * Возвращает число распределенное по нормальному закону распределения
+     * @param {*} mx - мат. ожидание
+     * @param {*} sx - среднеквадратичное отклонение
+     * @returns 
+     */
+    static GetGaussRandom(mx, sx) {
+        let sum = 0;
+        for (let i = 0; i < 12; ++i) {
+            sum += Math.random();
+        }
+        sum -= 6;
+        if (mx == 0 && sx == 1) return sum;
+        else return mx + sx * sum;
     }
 }
 
@@ -92,7 +112,16 @@ class Force {
      */
     constructor(acceleration, angle) {
         this.Acceleration = acceleration;
-        this.Angle = angle;
+        if (angle < 0) {
+            this.Angle = 360 - angle;
+        }
+        else
+            if (angle > 360) {
+                this.Angle = angle - 360;
+            }
+            else {
+                this.Angle = angle;
+            }
     }
 }
 
@@ -202,7 +231,7 @@ class WeaponItem extends InventoryItem {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
             let shell = new Shell(PlayerObj.GetPosition(), GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
-                this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), this._ShellTemplate.MaxYPos, this._ShellTemplate.MaxXPos,
+                this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), PlayerObj.MaxYPos, PlayerObj.MaxXPos,
                 this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage());
             shell.AddForce(new Force(1, PlayerObj.GetAngle()));
             return shell;

@@ -1,11 +1,11 @@
 class MapGenerator {
 
     static _GenerateStaticBody(Position) {
-        return new GameObject(Position, GUID.CreateGuid(), AssetId.Bodies.Star, Randomizer.GetRandomInt(20, 300), Randomizer.GetRandomInt(BaseMass, 1000));
+        return new GameObject(Position, GUID.CreateGuid(), AssetId.Bodies.Star, Randomizer.GetRandomInt(5, 50), Randomizer.GetRandomInt(BaseMass, 1000));
     }
 
     static _GenerateMovableBody(Position, maxpos) {
-        return new MovableObject(Position, GUID.CreateGuid(), AssetId.Bodies.Asteroid, Randomizer.GetRandomInt(20, 300),
+        return new MovableObject(Position, GUID.CreateGuid(), AssetId.Bodies.Asteroid, Randomizer.GetRandomInt(5, 50),
             Randomizer.GetRandomInt(BaseMass, 1000), maxpos.Y, maxpos.X);
     }
 

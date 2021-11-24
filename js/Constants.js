@@ -5,16 +5,19 @@ const SpawnFrameTimeout = 300;
 const AttackFrameTimeout = 500;
 const MovableBodyForcesLimit = 20;
 const Friction = 0.0008
-const BaseRadius = 30;
+const BaseRadius = 15;
 const BaseAcceleration = 0.1;
+const MovableBodiesMinAcceleration = BaseAcceleration * 0.08;
+const MovableBodiesMaxAcceleration = BaseAcceleration * 0.5;
 const BaseMass = 100;
 const BaseShellMass = 2;
-const BaseShellRadius = 2;
+const BaseShellRadius = 1;
 const BaseMaxHP = 500;
 const BaseDamage = 4;
 const BaseDistance = 300;
 const MaxStaticBodiesPerMap = 15;
 const MaxMovableBodiesPerMap = 5;
+const ShellMaxDistance = 200;
 const EnemyVisionRange = 500;
 
 /**
