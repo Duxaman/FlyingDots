@@ -210,6 +210,7 @@ div#workplace p {
 
 .Map {
     background-size: 10px;
+    background-repeat: no-repeat;
 }
 
 .LiteWeaponUI {

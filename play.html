@@ -159,8 +159,13 @@
                 if (SelectedInvInd >= inv.length - 1) //if item has been removed
                 {
                     InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
-                    SelectedInvInd = inv.length - 1;
-                    InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+                    if (inv.length > 0) {
+                        SelectedInvInd = inv.length - 1;
+                        InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+                    }
+                    else {
+                        SelectedInvInd = undefined;
+                    }
                 }
             }
         }

@@ -196,6 +196,7 @@ class Game {
                 break;
             case ActivateItemBtn:
                 res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player);
+                break;
             case MoveUpBtn:
                 this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 270));
                 break;
@@ -252,7 +253,7 @@ class Game {
         }
         for (const obj of this._GameObjects.MovableBodies) {
             obj.Move();
-            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), 120)));
+            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), MovableBodiesAngleVariance)));
         }
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
@@ -378,18 +379,18 @@ class Renderer {
             var element = document.getElementById(obj.GetId());
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
-                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP(), obj.GetAngle());
             }
             else {
                 element = this._CreateElement(obj);
-                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP(), obj.GetAngle());
                 this._PlayArea.appendChild(element);
             }
         }
     }
 
-    _SetProperties(element, name, hp) {
-        element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ')</p>'; //not the best solution
+    _SetProperties(element, name, hp, angle) {
+        element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ' ' + angle + ')</p > '; //not the best solution
     }
 
     _SetPosition(element, position, radius) {

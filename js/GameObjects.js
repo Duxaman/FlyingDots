@@ -16,7 +16,7 @@ const AssetId =
     {
         LiteWeaponShell: "Body LiteWeaponShell",
         FireWeaponShell: "Body FireWeaponShell",
-        BibaWeaponShell: "Body BibaWeaponShell"
+        BibaWeaponShell: "Body BibaWeaponShell Map"
     },
     Buffs: {
         HealBuffItem: "Body HealBuffItem",
@@ -219,7 +219,7 @@ class WeaponItem extends InventoryItem {
             let shell = new Shell(Pos, GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
                 this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), PlayerObj.MaxYPos, PlayerObj.MaxXPos,
                 this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage(), PlayerObj.GetId());
-            shell.AddForce(new Force(1, PlayerObj.GetAngle()));
+            shell.AddForce(new Force(4, 180 + (180 - PlayerObj.GetAngle()))); //rotate coordinate system first, in order to correct y angle
             this.Amount -= 1;
             return shell;
         }
@@ -251,7 +251,7 @@ class BuffItem extends InventoryItem {
     ActivateItem(PlayerObj) {
         if (PlayerObj instanceof Player) {
             if (this.Amount > 0) {
-                PlayerObj.Heal(this._Power);
+                PlayerObj.ModifyHP(this._Power);
                 this.Amount -= 1;
             }
         }
@@ -306,9 +306,13 @@ class MovableObject extends GameObject {
             }
         }
         this._Forces = this._Forces.filter(x => x.Acceleration > 0); //deletes forces with zero acceleration
-        let CalcValue = Point.VectorNormalAngle(this._Position, this._OldPos);
-        if (CalcValue >= 0) {
-            this._Angle = CalcValue;
+        let CalcValue = Point.Distance(this._Position, this._OldPos);
+        if (CalcValue > 0) {
+            this._Angle = Math.acos((this._Position.X - this._OldPos.X) / CalcValue);
+            this._Angle = this._Angle * 180 / Math.PI;
+            if (this._Position.Y > this._OldPos.Y) {
+                this._Angle = 180 + (180 - this._Angle);
+            }
         }
         //correct coordinates with restrincted maxvalue
         if (this._Position.X < 0) this._Position.X = this.MaxXPos + this._Position.X;
