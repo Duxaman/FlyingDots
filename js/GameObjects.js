@@ -27,7 +27,6 @@ const AssetId =
         BibaWeaponUI: "Body BibaWeaponUI",
         HealBuffItemUI: "Body HealBuffItemUI"
     }
-
 }
 
 class GUID {
@@ -126,19 +125,22 @@ class Force {
 }
 
 /**
- * Базовый класс для всех игровых объектов
+ *  Базовый класс для всех игровых объектов с физическими параметрами
  */
-class SpawnableObject {
+class GameObject {
     /**
-     * 
      * @param {*} Position - Позиция тела на карте
      * @param {*} Id - Идентификатор тела
-     * @param {*} Asset - Сss класс
+     * @param {*} AssetId - Сss класс
+     * @param {*} Radius - Радиус тела
+     * @param {*} Mass - Масса тела
      */
-    constructor(Position, Id, Asset) {
+    constructor(Position, Id, AssetId, Radius, Mass) {
         this._Position = Position;
         this._Id = Id;
-        this._AssetId = Asset;
+        this._AssetId = AssetId;
+        this._Radius = Radius;
+        this._Mass = Mass;
         this._State = true;
     }
 
@@ -161,24 +163,6 @@ class SpawnableObject {
     Deactivate() {
         this._State = false;
     }
-}
-
-/**
- *  Базовый класс для всех игровых объектов с физическими параметрами
- */
-class GameObject extends SpawnableObject {
-    /**
-     * @param {*} Position - Позиция тела на карте
-     * @param {*} Id - Идентификатор тела
-     * @param {*} AssetId - Сss класс
-     * @param {*} Radius - Радиус тела
-     * @param {*} Mass - Масса тела
-     */
-    constructor(Position, Id, AssetId, Radius, Mass) {
-        super(Position, Id, AssetId);
-        this._Radius = Radius;
-        this._Mass = Mass;
-    }
 
     GetRadius() {
         return this._Radius;
@@ -192,7 +176,7 @@ class GameObject extends SpawnableObject {
 /**
  *  Базовый класс для всех игровых объектов которые можно добавить в инвентарь
  */
-class InventoryItem extends SpawnableObject {
+class InventoryItem extends GameObject {
     /**
      * @param {*} Position - Позиция тела на карте
      * @param {*} Id - Идентификатор тела
@@ -200,7 +184,7 @@ class InventoryItem extends SpawnableObject {
      * @param {*} Amount - Количество элементов
      */
     constructor(Position, Id, AssetId, Amount) {
-        super(Position, Id, AssetId);
+        super(Position, Id, AssetId, BaseRadius / 3, 0);
         this.Amount = Amount;
     }
 
@@ -230,14 +214,14 @@ class WeaponItem extends InventoryItem {
     ActivateItem(PlayerObj) {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
-            let shell = new Shell(PlayerObj.GetPosition(), GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
+            let PlayerPos = PlayerObj.GetPosition();
+            let Pos = new Point(PlayerPos.X, PlayerPos.Y);
+            let shell = new Shell(Pos, GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
                 this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), PlayerObj.MaxYPos, PlayerObj.MaxXPos,
-                this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage());
+                this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage(), PlayerObj.GetId());
             shell.AddForce(new Force(1, PlayerObj.GetAngle()));
+            this.Amount -= 1;
             return shell;
-        }
-        else {
-            throw "Этот элемент закончился";
         }
     }
 }
@@ -264,14 +248,12 @@ class BuffItem extends InventoryItem {
         return this._Power;
     }
 
-    ActivateItem() {
+    ActivateItem(PlayerObj) {
         if (PlayerObj instanceof Player) {
             if (this.Amount > 0) {
-                if (this._AssetId === AssetId.Buffs.HealBuffItem) {
-                    PlayerObj.Heal(this._Power);
-                }
+                PlayerObj.Heal(this._Power);
+                this.Amount -= 1;
             }
-            else throw "Этот элемент закончился";
         }
     }
 }
@@ -329,9 +311,9 @@ class MovableObject extends GameObject {
             this._Angle = CalcValue;
         }
         //correct coordinates with restrincted maxvalue
-        if (this._Position.X < 0) this._Position.X = this.MaxXPos - this._Position.X;
+        if (this._Position.X < 0) this._Position.X = this.MaxXPos + this._Position.X;
         if (this._Position.X > this.MaxXPos) this._Position.X = this._Position.X - this.MaxXPos;
-        if (this._Position.Y < 0) this._Position.Y = this.MaxYPos - this._Position.Y;
+        if (this._Position.Y < 0) this._Position.Y = this.MaxYPos + this._Position.Y;
         if (this._Position.Y > this.MaxYPos) this._Position.Y = this._Position.Y - this.MaxYPos;
 
     }
@@ -341,6 +323,19 @@ class MovableObject extends GameObject {
      */
     FlushForces() {
         this._Forces = [];
+    }
+
+    /**
+     * Возвращает мгновенное значение скорости тела относительно предыдущего положения
+     * @returns 
+     */
+    GetSpeedDt() {
+        if (this._OldPos === undefined) {
+            return 0;
+        }
+        else {
+            return Point.Distance(this._Position, this._OldPos);
+        }
     }
 
     /**
@@ -379,13 +374,15 @@ class Shell extends MovableObject {
      * @param {*} Mass - Масса тела
      * @param {*} MaxDistance - Максимальная дистанция полета снаряда
      * @param {*} Damage - Урон от снаряда
+     * @param {*} FatherId - ID игрока создавшего снаряд
      */
-    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, MaxDistance, Damage) {
+    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, MaxDistance, Damage, FatherId) {
         super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX);
         this._MaxDistance = MaxDistance;
         this._CurrentDistance = 0;
         this._Damage = Damage;
         this._BaseForceAdded = false;
+        this._FatherID = FatherId;
     }
 
     AddForce(force) {
@@ -399,11 +396,15 @@ class Shell extends MovableObject {
 
     }
 
+    GetFatherID() {
+        return this._FatherID;
+    }
+
     Move() {
         if (this.IsActive()) {
             super.Move();
             this._CurrentDistance += Point.Distance(this._Position, this._OldPos);
-            if (this._CurrentDistance === this._MaxDistance) {
+            if (this._CurrentDistance >= this._MaxDistance) {
                 this._State = false;
             }
             if (this._Forces.length === 0) {
@@ -440,7 +441,7 @@ class Player extends MovableObject {
         this._Name = Name;
         this._Health = MaxHP;
         this._MaxHP = MaxHP;
-        this.Inventory = new Inventory();
+        this.Inventory = new Inventory(InventorySize);
     }
 
     GetName() {

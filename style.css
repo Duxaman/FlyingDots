@@ -87,6 +87,9 @@ li:hover {
     border-style: solid;
     text-align: right;
     padding-top: 10px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    position: initial;
 }
 
 
@@ -205,34 +208,24 @@ div#workplace p {
 
 /**InventoryItems**/
 
-.HealBuffItem {
-    background-image: url(res/heal.png);
-    width: 30px;
-    height: 30px;
+.Map {
+    background-size: 10px;
 }
 
 .LiteWeaponUI {
     background-image: url(res/lightcannon.png);
-    width: 30px;
-    height: 30px;
 }
 
 .FireWeaponUI {
     background-image: url(res/firecannon.png);
-    width: 30px;
-    height: 30px;
 }
 
 .BibaWeaponUI {
     background-image: url(res/biba.gif);
-    width: 30px;
-    height: 30px;
 }
 
 .HealBuffItemUI {
     background-image: url(res/heal.png);
-    width: 30px;
-    height: 30px;
 }
 
 /**InventoryItems End**/

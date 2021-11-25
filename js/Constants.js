@@ -15,10 +15,23 @@ const BaseShellRadius = 1;
 const BaseMaxHP = 500;
 const BaseDamage = 4;
 const BaseDistance = 300;
-const MaxStaticBodiesPerMap = 15;
+const MaxStaticBodiesPerMap = 5;
 const MaxMovableBodiesPerMap = 5;
 const ShellMaxDistance = 200;
 const EnemyVisionRange = 500;
+const InventorySize = 4;
+
+/*Controls */
+const MoveUpBtn = 'w';
+const MoveDownBtn = 's';
+const MoveLeftBtn = 'a';
+const MoveRightBtn = 'd';
+const FirstInvBtn = '1';
+const SecondInvBtn = '2';
+const ThirdInvBtn = '3';
+const ForthInvBtn = '4';
+const ActivateItemBtn = ' ';
+
 
 /**
  * Difficulty settings
@@ -26,19 +39,19 @@ const EnemyVisionRange = 500;
 const MaxEnemyEasy = 3;
 const MaxWeaponAmountEasy = 10;
 const MaxEnemyHPEasy = 100;
-const MaxBuffAmountEasy = 10;
+const MaxBuffAmountEasy = 6;
 
 const MaxEnemyMedium = 6;
 const MaxWeaponAmountMedium = 6;
 const MaxEnemyHPMedium = 500;
-const MaxBuffAmountMedium = 6;
+const MaxBuffAmountMedium = 4;
 
 const MaxEnemyHard = 10;
 const MaxWeaponAmountHard = 3;
 const MaxEnemyHPHard = 1000;
-const MaxBuffAmountHard = 3;
+const MaxBuffAmountHard = 2;
 
 const MaxEnemyNuts = 15;
 const MaxWeaponAmountNuts = 2;
 const MaxEnemyHPNuts = 1000;
-const MaxBuffAmountNuts = 2;
+const MaxBuffAmountNuts = 1;

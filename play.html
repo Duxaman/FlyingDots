@@ -9,24 +9,6 @@
 
 <body onload="ShowSettings()">
     <div id="workplace">
-        <!-- Bodies format example
-        <div class="Body Ship Player" style="top: 50px; left:100px; width: 30px; height: 30px;">
-            <p>Test Name</p>
-        </div>
-        <div class="Body Ship Enemy" style="top: 80px; left:300px; width: 50px; height: 50px;">
-            <p>Name</p>
-        </div>
-        <div class="Body Star" style="top: 130px; left:100px; width: 100px; height: 100px;"></div>
-        <div class="Body Asteroid" style="top: 400px; left:100px; width: 150px; height: 150px;"></div>
-        <div class="Body LiteWeaponShell" style="top: 450px; left:100px; width: 2px; height: 2px;"></div>
-        <div class="Body FireWeaponShell" style="top: 470px; left:100px; width: 4px; height: 4px;"></div>
-        <div class="Body BibaWeaponShell" style="top: 490px; left:100px; width: 20px; height: 20px;"></div>
-        <div class="Body HealBuffItem" style="top: 520px; left:100px; width: 30px; height: 30px;"></div>
-        <div class="Body LiteWeaponUI" style="top: 580px; left:100px; width: 30px; height: 30px;"></div>
-        <div class="Body FireWeaponUI" style="top: 640px; left:100px; width: 30px; height: 30px;"></div>
-        <div class="Body BibaWeaponUI" style="top: 680px; left:100px; width: 30px; height: 30px;"></div>
-        <div class="Body HealBuffItemUI" style="top: 700px; left:100px; width: 30px; height: 30px;"></div>
-    -->
     </div>
     <div id="dashboard" class="box">
         <span>💛</span>
@@ -88,16 +70,16 @@
             switch (event.key) {
                 case "Escape": ToogleGamePause();
                     break;
-                case '1':
+                case FirstInvBtn:
                     SelectItemUi(1);
                     break;
-                case '2':
+                case SecondInvBtn:
                     SelectItemUi(2);
                     break;
-                case '3':
+                case ThirdInvBtn:
                     SelectItemUi(3);
                     break;
-                case '4':
+                case ForthInvBtn:
                     SelectItemUi(4);
                     break;
                 default:
@@ -163,29 +145,30 @@
 
         function UpdateHealthBar() {
             let stat = GameObj.GetPlayerStat();
-            HpBox.innerText = stat[0];
+            HpBox.innerText = Math.round(stat[0]);
             HpBar.style.width = stat[0] / (stat[1] / 100) + "%";
         }
 
         function UpdateInventory() {
-            let inv = GameObj.GetPlayerStat();
-            for (let i = 0; i < inv.Length; ++i) {
+            let inv = GameObj.GetInvStat();
+            for (let i = 0; i < inv.length; ++i) {
                 InvBox[i].setAttribute('class', inv[i][0]);
-                InvBox[i].InnerText = inv[i][1];
+                InvBox[i].innerText = inv[i][1];
             }
             if (SelectedInvInd !== undefined) {
-                if (SelectedInvInd >= inv.Length - 1) //if item has been removed
+                if (SelectedInvInd >= inv.length - 1) //if item has been removed
                 {
                     InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
-                    SelectedInvInd = inv.Length - 1;
+                    SelectedInvInd = inv.length - 1;
                     InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
                 }
             }
         }
 
         function SelectItemUi(ind) {
-            InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
-            SelectedInvInd = ind;
+            if (SelectedInvInd != undefined)
+                InvBox[SelectedInvInd].style.removeProperty('border-color'); //unselect previous item in ui
+            SelectedInvInd = ind - 1;
             InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
         }
 

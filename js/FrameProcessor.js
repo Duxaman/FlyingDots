@@ -17,7 +17,8 @@ class FrameProcessor {
                 }
             }
             for (let j = 0; j < len2; ++j) {
-                if (this._IsReachable(objectpool.Players[i], objectpool.Shells[j])) {
+                if (this._IsReachable(objectpool.Players[i], objectpool.Shells[j])
+                    && objectpool.Shells[j].GetFatherID() !== objectpool.Players[i].GetId()) {
                     this._ApplyPlayerShellCollision(objectpool.Players[i], objectpool.Shells[j]);
                 }
             }
@@ -33,7 +34,7 @@ class FrameProcessor {
             }
             for (let j = 0; j < len5; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.MovableBodies[j])) {
-                    this._ApplyPlayerMovableBodyItemCollision(objectpool.Players[i]);
+                    this._ApplyPlayerMovableBodyItemCollision(objectpool.Players[i], objectpool.MovableBodies[j]);
                 }
             }
         }  //mov bodies + shells
@@ -65,17 +66,19 @@ class FrameProcessor {
     }
     static _ApplyPlayerShellCollision(player, shell) {
         shell.Deactivate();
-        player.ModiFyHP(-shell.GetDamage());
+        player.ModifyHP(-shell.GetDamage());
     }
     static _ApplyPlayerInventoryItemCollision(player, inv_item) {
         player.Inventory.AddItem(inv_item);
         inv_item.Deactivate();
     }
-    static _ApplyPlayerStaticBodyItemCollision(player) {
+    static _ApplyPlayerStaticBodyItemCollision(player) {      //dummy physics
+        player.ModifyHP(-player.GetSpeedDt() * player.GetMass() * 0.1);
         player.FlushForces();
         player.Revert();
     }
-    static _ApplyPlayerMovableBodyItemCollision(player) {
+    static _ApplyPlayerMovableBodyItemCollision(player, movable_body) {
+        player.ModifyHP(-(player.GetSpeedDt() * player.GetMass() + movable_body.GetSpeedDt() * movable_body.GetMass()) * 0.001);
         player.FlushForces();
         player.Revert();
     }

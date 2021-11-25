@@ -182,30 +182,30 @@ class Game {
     _HandlePlayerMovement(event) {
         let res;
         switch (event.key) {
-            case '1':
+            case FirstInvBtn:
                 this._GameObjects.Player.Inventory.SelectItem(0);
                 break;
-            case '2':
+            case SecondInvBtn:
                 this._GameObjects.Player.Inventory.SelectItem(1);
                 break;
-            case '3':
+            case ThirdInvBtn:
                 this._GameObjects.Player.Inventory.SelectItem(2);
                 break;
-            case '4':
+            case ForthInvBtn:
                 this._GameObjects.Player.Inventory.SelectItem(3);
                 break;
-            case 'f':
+            case ActivateItemBtn:
                 res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player);
-            case 'w':
+            case MoveUpBtn:
                 this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 270));
                 break;
-            case 's':
+            case MoveDownBtn:
                 this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 90));
                 break;
-            case 'a':
+            case MoveLeftBtn:
                 this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 180));
                 break;
-            case 'd':
+            case MoveRightBtn:
                 this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 0));
                 break;
             default: break;
@@ -228,7 +228,7 @@ class Game {
             this._SavedTime += this._EndTime - this._StartTime;
         }
         clearTimeout(this._FrameTimer); //stop game timer
-        window.removeEventListener('keydown', _HandlePlayerMovement); //stop watching for user input
+        window.removeEventListener('keydown', this._HandlePlayerMovement); //stop watching for user input
     }
 
     /**
@@ -239,11 +239,11 @@ class Game {
             obj.Move();
             if (obj.GetId() != 0) {
                 if (this._EnemyAttackFrameCounter === AttackFrameTimeout) {
-                    EnemyAI.Analyze(obj, this._GameObjects, true);
+                    //EnemyAI.Analyze(obj, this._GameObjects, true);
                     this._EnemyAttackFrameCounter = 0;
                 }
                 else {
-                    EnemyAI.Analyze(obj, this._GameObjects, false);
+                    //EnemyAI.Analyze(obj, this._GameObjects, false);
                 }
             }
         }
@@ -252,7 +252,7 @@ class Game {
         }
         for (const obj of this._GameObjects.MovableBodies) {
             obj.Move();
-            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), 90)));
+            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), 120)));
         }
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
@@ -378,13 +378,18 @@ class Renderer {
             var element = document.getElementById(obj.GetId());
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
             }
             else {
                 element = this._CreateElement(obj);
-                if (obj instanceof Player) element.innerHTML = '<p>' + obj.GetName() + ' (' + obj.GetHP() + ')</p>'; //not the best solution
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
                 this._PlayArea.appendChild(element);
             }
         }
+    }
+
+    _SetProperties(element, name, hp) {
+        element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ')</p>'; //not the best solution
     }
 
     _SetPosition(element, position, radius) {
@@ -395,11 +400,12 @@ class Renderer {
         let element = document.createElement('div');
         element.setAttribute('id', obj.GetId());
         element.setAttribute('class', obj.GetAssetId());
-        this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
-        if (obj instanceof GameObject) {
-            element.style.width = obj.GetRadius() * 2 + "px";
-            element.style.height = obj.GetRadius() * 2 + "px";
+        if (obj instanceof InventoryItem) { //no the best solutuion
+            element.classList.add('Map');
         }
+        this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
+        element.style.width = obj.GetRadius() * 2 + "px";
+        element.style.height = obj.GetRadius() * 2 + "px";
         return element
     }
 }
