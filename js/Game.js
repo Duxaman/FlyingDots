@@ -18,6 +18,69 @@ class ObjectPool {
         this.MovableBodies = [];
         this.InvItems = [];
     }
+
+    /**
+     * Вызывает расчет следующей позиции на карте каждого движущегося тела
+     */
+    MoveObjects() {
+        for (const obj of this.Shells) {
+            obj.Move();
+        }
+        for (const obj of this.Players) {
+            obj.Move();
+        }
+        for (const obj of this.MovableBodies) {
+            obj.Move();
+        }
+    }
+
+    /**
+     * Добавляет сил каждому самостоятельно движущемуся телу
+     */
+    MaintainForces() {
+        for (const obj of this.MovableBodies) {
+            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), MovableBodiesAngleVariance)));
+        }
+    }
+
+    /**
+     * Вызывает у каждого ИИ соперника анализ карты, для выбора маршрута и цели
+     */
+    EnemiesAnalyze() {
+        for (const obj of this.Players) {
+            if (obj.GetId() != 0) {
+                obj.Analyze();
+            }
+        }
+    }
+
+    /**
+     * Возвращает массив неактивных игроков
+     * @returns 
+     */
+    GetInactivePlayers() {
+        return this.Players.filter(obj => !obj.IsActive());
+    }
+
+    /**
+     * Возвращает массив неактивных снарядов 
+     * @returns 
+     */
+    GetInactiveShells() {
+        return this.Shells.filter(obj => !obj.IsActive());
+    }
+
+
+    GetInactiveInvItems() {
+        return this.InvItems.filter(obj => !obj.IsActive())
+    }
+
+    ClearInactiveItems() {
+        this.Players = this.Players.filter(obj => obj.IsActive()); //remove inactive elements
+        this.Shells = this.Shells.filter(obj => obj.IsActive());
+        this.InvItems = this.InvItems.filter(obj => obj.IsActive());
+    }
+
 }
 
 /**
@@ -64,10 +127,6 @@ class Game {
          * Счетчик обновлений карты, необходимый для спавна
          */
         this._SpawnFrameCounter = 0;
-        /**
-        * Счетчик обновлений карты, необходимый для атак ИИ противника
-        */
-        this._EnemyAttackFrameCounter = 0;
         /**
          * Хранилище всех игровых объектов
          */
@@ -236,36 +295,20 @@ class Game {
      * Обрабатывает все события игры в текущем кадре
      */
     _GameTick() {
-        for (let obj of this._GameObjects.Players) {
-            obj.Move();
-            if (obj.GetId() != 0) {
-                if (this._EnemyAttackFrameCounter === AttackFrameTimeout) {
-                    //EnemyAI.Analyze(obj, this._GameObjects, true);
-                    this._EnemyAttackFrameCounter = 0;
-                }
-                else {
-                    //EnemyAI.Analyze(obj, this._GameObjects, false);
-                }
-            }
-        }
-        for (const obj of this._GameObjects.Shells) {
-            obj.Move();
-        }
-        for (const obj of this._GameObjects.MovableBodies) {
-            obj.Move();
-            obj.AddForce(new Force(Randomizer.GetRandomInt(MovableBodiesMinAcceleration, MovableBodiesMaxAcceleration), Randomizer.GetGaussRandom(obj.GetAngle(), MovableBodiesAngleVariance)));
-        }
+        this._GameObjects.MoveObjects();
+        this._GameObjects.EnemiesAnalyze();
+        this._GameObjects.MaintainForces();
         let GameOver = false;
         FrameProcessor.CalculateFrame(this._GameObjects);
         if (this._GameObjects.Player.GetHP() === 0) {
             GameOver = true;
         }
-        for (const obj of this._GameObjects.Players) {
-            if (obj.GetId() != 0 && !obj.IsActive()) {
-                this._Score += ScoreForOne;
-            }
-        }
         if (!GameOver) {
+            let deadenemies = this._GameObjects.GetInactivePlayers().length;
+            if (deadenemies > 0) {
+                this._Score += ScoreForOne * (this._GameObjects.GetInactivePlayers().length - 1);
+
+            }
             this._Despawn();
             if (this._SpawnFrameCounter === SpawnFrameTimeout) {
                 this._SpawnItems();
@@ -282,7 +325,7 @@ class Game {
     /**
      * Спавнит новые элементы на карту
      */
-    _SpawnItems() { //TODO: change filter method to loops
+    _SpawnItems() {
         let CurrentBuffs = this._GameObjects.InvItems.filter(obj => obj instanceof BuffItem).length;
         let CurrentEnemies = this._GameObjects.Players.length - 1; //excluding player
         let CurrentWeapons = this._GameObjects.InvItems.filter(obj => obj instanceof WeaponItem).length;
@@ -292,7 +335,7 @@ class Game {
         let MaxHP;
         if (this._Difficulty === Difficulty.Easy) {
             BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountEasy - CurrentBuffs);
-            EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyEasy - CurrentEnemies);
+            EnemiesToSpawn = Randomizer.GetRandomInt(1, MaxEnemyEasy - CurrentEnemies);
             WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountEasy - CurrentWeapons);
             MaxHP = MaxEnemyHPEasy;
         } else
@@ -330,15 +373,11 @@ class Game {
      */
     _Despawn() {
         //удаляем элементы
-        this._Renderer.RemoveElements(this._GameObjects.Players.filter(obj => !obj.IsActive())); //TODO: perhaps there's a better way?
-        this._Renderer.RemoveElements(this._GameObjects.Shells.filter(obj => !obj.IsActive()));
-        this._Renderer.RemoveElements(this._GameObjects.MovableBodies.filter(obj => !obj.IsActive()));
-        this._Renderer.RemoveElements(this._GameObjects.InvItems.filter(obj => !obj.IsActive()));
+        this._Renderer.RemoveElements(this._GameObjects.GetInactivePlayers());
+        this._Renderer.RemoveElements(this._GameObjects.GetInactiveShells());
+        this._Renderer.RemoveElements(this._GameObjects.GetInactiveInvItems());
         //удаляем объекты
-        this._GameObjects.Players = this._GameObjects.Players.filter(obj => obj.IsActive()); //remove inactive elements
-        this._GameObjects.Shells = this._GameObjects.Shells.filter(obj => obj.IsActive());
-        this._GameObjects.MovableBodies = this._GameObjects.MovableBodies.filter(obj => obj.IsActive());
-        this._GameObjects.InvItems = this._GameObjects.InvItems.filter(obj => obj.IsActive());
+        this._GameObjects.ClearInactiveItems();
     }
 }
 
@@ -379,18 +418,18 @@ class Renderer {
             var element = document.getElementById(obj.GetId());
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
-                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP(), obj.GetAngle());
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
             }
             else {
                 element = this._CreateElement(obj);
-                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP(), obj.GetAngle());
+                if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
                 this._PlayArea.appendChild(element);
             }
         }
     }
 
-    _SetProperties(element, name, hp, angle) {
-        element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ' ' + angle + ')</p > '; //not the best solution
+    _SetProperties(element, name, hp) {
+        element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ') </p > '; //not the best solution
     }
 
     _SetPosition(element, position, radius) {

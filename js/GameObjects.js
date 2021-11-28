@@ -87,10 +87,10 @@ class Point {
      * @param {*} VecBPoint - Координата конца вектора
      */
     static VectorNormalAngle(VecAPoint, VecBPoint) {
-        var den = Point.Distance(VecAPoint, VecBPoint);
+        let den = Point.Distance(VecAPoint, VecBPoint);
         if (den !== 0) {
-            var Angle = Math.acos((VecAPoint.X - VecBPoint.X) / den);
-            Angle = this._Angle * 180 / Math.PI;
+            let Angle = Math.acos((VecAPoint.X - VecBPoint.X) / den);
+            Angle = Angle * 180 / Math.PI;
             if (VecAPoint.Y > VecBPoint.Y) {
                 Angle = 180 + (180 - Angle);
             }
@@ -347,14 +347,18 @@ class MovableObject extends GameObject {
      */
     Revert() {
         if (this._OldPos !== undefined) {
+            if (this._OldPos === this._Position) {
+                this._Position.X -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1)); //teleport to random spot
+                this._Position.Y -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1));  //TODO:!!!
+            }
             this._Position = this._OldPos;
         }
         else {
             if (this._Position.X - this._Radius >= 0) {
-                this._Position.X = this._Position.X - this._Radius;
+                this._Position.X -= this._Radius;
             }
             else {
-                this._Position.X = this._Position.X + this._Radius;
+                this._Position.X += this._Radius;
             }
         }
     }
@@ -376,6 +380,8 @@ class Shell extends MovableObject {
      * @param {*} AssetId - Сss класс
      * @param {*} Radius - Радиус тела
      * @param {*} Mass - Масса тела
+     * @param {*} MaxY - Максимальная позиция по оси Y
+     * @param {*} MaxX - Максимальная позиция по оси Х
      * @param {*} MaxDistance - Максимальная дистанция полета снаряда
      * @param {*} Damage - Урон от снаряда
      * @param {*} FatherId - ID игрока создавшего снаряд
@@ -437,8 +443,10 @@ class Player extends MovableObject {
      * @param {*} AssetId - Сss класс
      * @param {*} Radius - Радиус тела
      * @param {*} Mass - Масса тела
-     * @param {*} Name 
-     * @param {*} MaxHP 
+     * @param {*} MaxY - Максимальная позиция по оси Y
+     * @param {*} MaxX - Максимальная позиция по оси Х
+     * @param {*} Name  - Имя игрока
+     * @param {*} MaxHP - Максимальное здоровье игрока
      */
     constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP) {
         super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX);
@@ -472,5 +480,187 @@ class Player extends MovableObject {
             else {
                 this._Health = hp + this._Health;
             }
+    }
+}
+
+/**
+ * Представляет игрока-соперника
+ */
+class EnemyPlayer extends Player {
+    /**
+     * 
+     * @param {*} Position - Позиция тела на карте
+     * @param {*} Id - Идентификатор тела
+     * @param {*} AssetId - Сss класс
+     * @param {*} Radius - Радиус тела
+     * @param {*} Mass - Масса тела
+     * @param {*} MaxY - Максимальная позиция по оси Y
+     * @param {*} MaxX - Максимальная позиция по оси Х
+     * @param {*} Name  - Имя игрока
+     * @param {*} MaxHP - Максимальное здоровье игрока
+     */
+    constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP) {
+        super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP);
+        this._Object_to_Follow = null;
+        this._AttackCounter = null;
+    }
+
+    Analyze(objectpool) {
+        this._AttackCounter++;
+        let can_attack = false;
+        if (this._AttackCounter === AttackFrameTimeout) {
+            can_attack = true;
+            this._AttackCounter = 0;
+        }
+        let need_heal = false;
+        let need_weapon = false;
+        if ((this.GetHP() * 100 / this.GetMaxHP()) < 50) {
+            need_heal = true;
+        }
+        need_weapon = this._WeaponCheck();
+        if (this._CanFollowObject()) {
+            if (need_heal) {
+                if (!(this._Object_to_Follow instanceof BuffItem)) {
+                    let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
+                    if (res !== undefined) {
+                        this._Object_to_Follow = res;
+                    }
+                }
+                this._FollowBuff();
+                return;
+            }
+            if (need_weapon) {
+                if (!(this._Object_to_Follow instanceof WeaponItem)) {
+                    let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
+                    if (res !== undefined) {
+                        this._Object_to_Follow = res;
+                    }
+                }
+                this._FollowBuff();
+                return;
+            }
+            this._FollowPlayer();
+            if (can_attack) {
+                this._Attack();
+            }
+        }
+        else {
+            this._Object_to_Follow = null;
+            if (need_heal) {
+                let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
+                if (res !== undefined) {
+                    this._Object_to_Follow = res;
+                    this._FollowBuff();
+                    return;
+                }
+            }
+            if (need_weapon) {
+                let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
+                if (res !== undefined) {
+                    this._Object_to_Follow = res;
+                    this._FollowBuff();
+                    return;
+                }
+            }
+            let res = this._TrySeekPlayer(objectpool.Player);
+            if (res !== undefined) {
+                this._Object_to_Follow = res;
+                this._FollowPlayer();
+                return;
+            }
+            this._RandomMove();
+        }
+    }
+
+    _CanFollowObject() {
+        if (this.Object_to_Follow != null) {
+            return this.Object_to_Follow.IsActive() && this._IsInVisionRange(this.Object_to_Follow);
+        }
+        return false;
+    }
+
+    _RandomMove() {
+        this.AddForce(new Force(BaseAcceleration * 0.5, Randomizer.GetRandomInt(0, 360)));
+    }
+
+    _TrySeekBuff(inv_items_pool) {
+        for (const element of inv_items_pool) {
+            if (this._IsInVisionRange(this, element)) {
+                return element;
+            }
+        }
+    }
+
+    _TrySeekPlayer(player) {
+        if (this._IsInVisionRange(this, player))
+            return player;
+    }
+
+    _IsInVisionRange(goal) {
+        if (Point.Distance(this.GetPosition(), goal.GetPosition()) <= EnemyVisionRange) {
+            return true;
+        }
+        return false;
+    }
+
+    _Heal() {
+        /**
+         * iterate over inventory, find first heal, activate it, return true
+         * if heal was not activated return false
+         */
+        for (let i = 0; i < this.Inventory.Count(); ++i) {
+            let Item = this.Inventory.GetItemAt(i);
+            if (Item instanceof BuffItem) {
+                this.Inventory.SelectItem(i);
+                this.Inventory.ActivateItem(player_obj);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    _Attack(shellpool) {
+        shellpool.push(this.Inventory.ActivateItem(this));
+    }
+
+    _WeaponCheck() {
+        /**
+         * iterate over inventory, find first weapon, select it, return true
+         * if none weapon was found return false
+         */
+        for (let i = 0; i < this.Inventory.Count(); ++i) {
+            let Item = this.Inventory.GetItemAt(i);
+            if (Item instanceof WeaponItem) {
+                this.Inventory.SelectItem(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    _FollowBuff() {
+        //add forces towards goal
+        //determine angle 
+        let vec1 = this.GetPosition();
+        let vec2 = this._Object_to_Follow.GetPosition();
+        let calc_angle = Point.VectorNormalAngle(vec1, vec2);
+        this.AddForce(new Force(BaseAcceleration * 0.25, calc_angle));
+    }
+
+    _FollowPlayer() {
+        //add forces towards goal
+        //determine angle 
+        let vec1 = this.GetPosition();
+        let vec2 = this._Object_to_Follow.GetPosition();
+        let distance = Point.Distance(vec1, vec2);
+        let calc_angle = Point.VectorNormalAngle(vec1, vec2);
+        if (distance < 300) //if player is too close, dodge shells, don't get closer
+        {
+            this._RandomMove(obj);
+        }
+        else
+            this.AddForce(new Force(BaseAcceleration * 0.25, calc_angle));
+
+
     }
 }

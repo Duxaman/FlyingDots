@@ -71,16 +71,16 @@
                 case "Escape": ToogleGamePause();
                     break;
                 case FirstInvBtn:
-                    SelectItemUi(1);
+                    SelectInvItemUi(0);
                     break;
                 case SecondInvBtn:
-                    SelectItemUi(2);
+                    SelectInvItemUi(1);
                     break;
                 case ThirdInvBtn:
-                    SelectItemUi(3);
+                    SelectInvItemUi(2);
                     break;
                 case ForthInvBtn:
-                    SelectItemUi(4);
+                    SelectInvItemUi(3);
                     break;
                 default:
                     break; //player movements are handled in game obj
@@ -155,26 +155,41 @@
                 InvBox[i].setAttribute('class', inv[i][0]);
                 InvBox[i].innerText = inv[i][1];
             }
+            for (let i = InventorySize - 1; i >= inv.length; --i) {  //clear others inv items
+                ClearInvItemUI(i);
+            }
             if (SelectedInvInd !== undefined) {
-                if (SelectedInvInd >= inv.length - 1) //if item has been removed
+                if (SelectedInvInd > inv.length - 1) //if item has been removed
                 {
-                    InvBox[SelectedInvInd].style.removeProperty('border-color') //unselect previous item in ui
                     if (inv.length > 0) {
                         SelectedInvInd = inv.length - 1;
-                        InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+                        SelectInvItemUi(SelectedInvInd); //select last item
                     }
                     else {
-                        SelectedInvInd = undefined;
+                        SelectedInvInd = undefined;      //or set selected as undefined
                     }
                 }
             }
         }
 
-        function SelectItemUi(ind) {
-            if (SelectedInvInd != undefined)
-                InvBox[SelectedInvInd].style.removeProperty('border-color'); //unselect previous item in ui
-            SelectedInvInd = ind - 1;
-            InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+        function ClearInvItemUI(ind) {
+            InvBox[ind].removeAttribute('class');
+            InvBox[ind].style.removeProperty('border-color')
+            InvBox[ind].innerText = '0';
+        }
+
+        function DeselectInvItemUI(ind) {
+            InvBox[ind].style.removeProperty('border-color') //unselect previous item in ui
+        }
+
+        function SelectInvItemUi(ind) {
+            if (InvBox[ind].innerText !== '0') {
+                if (SelectedInvInd !== undefined)
+                    InvBox[SelectedInvInd].style.removeProperty('border-color'); //unselect previous item in ui if it exists
+                SelectedInvInd = ind;
+                InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
+            }
+
         }
 
         function OnGameOver(PlayerName, SavedTime, Score) {
@@ -192,7 +207,6 @@
     <script src="js/MapGenerator.js"></script>
     <script src="js/Spawner.js"></script>
     <script src="js/Game.js"></script>
-    <script src="js/EnemyAI.js"></script>
 </body>
 
 </html>

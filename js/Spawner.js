@@ -37,7 +37,7 @@ class Spawner {
         let Mass = BaseMass;
         let Name = this.DefaultNames[Randomizer.GetRandomInt(1, this.DefaultNames.length)];
         let ID = GUID.CreateGuid();
-        return new Player(MapPoint, ID, Asset, Radius, Mass, mapsize.Y, mapsize.X, Name, MaxHp);
+        return new EnemyPlayer(MapPoint, ID, Asset, Radius, Mass, mapsize.Y, mapsize.X, Name, MaxHp);
     }
 
     static SpawnBuff(mapsize) {            //spawn at any point, collisions will be resolved anyway

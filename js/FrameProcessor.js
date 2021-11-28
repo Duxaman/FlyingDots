@@ -58,11 +58,11 @@ class FrameProcessor {
         return r >= Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
     }
 
-    static _ApplyPlayerPlayerCollision(player1, player2) {
-        player1.FlushForces();
-        player2.FlushForces();
-        player1.Revert();
-        player2.Revert();
+    static _ApplyPlayerEnemyCollision(player, enemy) {
+        player.FlushForces();
+        enemy.FlushForces();
+        player.Revert();
+        enemy.Revert();
     }
     static _ApplyPlayerShellCollision(player, shell) {
         shell.Deactivate();
