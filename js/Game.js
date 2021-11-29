@@ -49,7 +49,7 @@ class ObjectPool {
     EnemiesAnalyze() {
         for (const obj of this.Players) {
             if (obj.GetId() != 0) {
-                obj.Analyze();
+                obj.Analyze(this);
             }
         }
     }
@@ -409,7 +409,8 @@ class Renderer {
      */
     RemoveElements(array) {
         for (const obj of array) {
-            document.getElementById(obj.GetId()).remove();
+            let el = document.getElementById(obj.GetId());
+            if (el !== null) el.remove();
         }
     }
 
@@ -419,13 +420,19 @@ class Renderer {
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
+                if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
             }
             else {
                 element = this._CreateElement(obj);
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
+                if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
                 this._PlayArea.appendChild(element);
             }
         }
+    }
+
+    _SetDebugProp(element, state, curforceangle) {
+        element.innerHTML = '<p>' + state + ' (' + curforceangle + ') </p > '; //not the best solution
     }
 
     _SetProperties(element, name, hp) {

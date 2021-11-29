@@ -87,16 +87,16 @@ class Point {
      * @param {*} VecBPoint - Координата конца вектора
      */
     static VectorNormalAngle(VecAPoint, VecBPoint) {
-        let den = Point.Distance(VecAPoint, VecBPoint);
-        if (den !== 0) {
-            let Angle = Math.acos((VecAPoint.X - VecBPoint.X) / den);
-            Angle = Angle * 180 / Math.PI;
-            if (VecAPoint.Y > VecBPoint.Y) {
-                Angle = 180 + (180 - Angle);
+        let VecPoint = new Point(VecBPoint.X - VecAPoint.X, VecBPoint.Y - VecAPoint.Y);
+        let den = Math.sqrt(Math.pow(VecPoint.X, 2) + Math.pow(VecPoint.Y, 2));
+        if (den != 0) {
+            let angle = Math.acos(VecPoint.X / den);
+            angle *= 180 / Math.PI;
+            if (VecBPoint.Y > VecAPoint.Y) {
+                angle = 180 + (180 - angle);
             }
-            return Angle;
+            return angle;
         }
-        return -1;
     }
 }
 
@@ -315,10 +315,26 @@ class MovableObject extends GameObject {
             }
         }
         //correct coordinates with restrincted maxvalue
-        if (this._Position.X < 0) this._Position.X = this.MaxXPos + this._Position.X;
-        if (this._Position.X > this.MaxXPos) this._Position.X = this._Position.X - this.MaxXPos;
-        if (this._Position.Y < 0) this._Position.Y = this.MaxYPos + this._Position.Y;
-        if (this._Position.Y > this.MaxYPos) this._Position.Y = this._Position.Y - this.MaxYPos;
+        if (this._Position.X < 0) {
+            this._Position.X = 0;
+            //this._Position.X = this.MaxXPos + this._Position.X;
+            this.FlushForces(); //do not let the body to gain much speed
+        }
+        if (this._Position.X > this.MaxXPos) {
+            this._Position.X = this.MaxXPos;
+            //this._Position.X = this._Position.X - this.MaxXPos;
+            this.FlushForces(); //do not let the body to gain much speed
+        }
+        if (this._Position.Y < 0) {
+            this._Position.Y = 0;
+            //this._Position.Y = this.MaxYPos + this._Position.Y;
+            this.FlushForces(); //do not let the body to gain much speed
+        }
+        if (this._Position.Y > this.MaxYPos) {
+            this._Position.Y = this.MaxYPos;
+            //this._Position.Y = this._Position.Y - this.MaxYPos;
+            this.FlushForces(); //do not let the body to gain much speed
+        }
 
     }
 
@@ -503,6 +519,8 @@ class EnemyPlayer extends Player {
         super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP);
         this._Object_to_Follow = null;
         this._AttackCounter = null;
+        this.State = "None";
+        this.curforceangle = "None";
     }
 
     Analyze(objectpool) {
@@ -517,9 +535,10 @@ class EnemyPlayer extends Player {
         if ((this.GetHP() * 100 / this.GetMaxHP()) < 50) {
             need_heal = true;
         }
-        need_weapon = this._WeaponCheck();
+        need_weapon = !this._WeaponCheck();
         if (this._CanFollowObject()) {
             if (need_heal) {
+                this.State = "Follow Heal";
                 if (!(this._Object_to_Follow instanceof BuffItem)) {
                     let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
                     if (res !== undefined) {
@@ -530,6 +549,7 @@ class EnemyPlayer extends Player {
                 return;
             }
             if (need_weapon) {
+                this.State = "Follow Weapon";
                 if (!(this._Object_to_Follow instanceof WeaponItem)) {
                     let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
                     if (res !== undefined) {
@@ -539,9 +559,10 @@ class EnemyPlayer extends Player {
                 this._FollowBuff();
                 return;
             }
+            this.State = "Follow Player";
             this._FollowPlayer();
             if (can_attack) {
-                this._Attack();
+                this._Attack(objectpool.Shells);
             }
         }
         else {
@@ -549,6 +570,7 @@ class EnemyPlayer extends Player {
             if (need_heal) {
                 let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
                 if (res !== undefined) {
+                    this.State = "Follow Heal";
                     this._Object_to_Follow = res;
                     this._FollowBuff();
                     return;
@@ -557,6 +579,7 @@ class EnemyPlayer extends Player {
             if (need_weapon) {
                 let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
                 if (res !== undefined) {
+                    this.State = "Follow Weapon";
                     this._Object_to_Follow = res;
                     this._FollowBuff();
                     return;
@@ -564,23 +587,28 @@ class EnemyPlayer extends Player {
             }
             let res = this._TrySeekPlayer(objectpool.Player);
             if (res !== undefined) {
+                this.State = "Follow Player";
                 this._Object_to_Follow = res;
                 this._FollowPlayer();
+                if (can_attack) {
+                    this._Attack(objectpool.Shells);
+                }
                 return;
             }
+            this.State = "RandomMove";
             this._RandomMove();
         }
     }
 
     _CanFollowObject() {
-        if (this.Object_to_Follow != null) {
-            return this.Object_to_Follow.IsActive() && this._IsInVisionRange(this.Object_to_Follow);
+        if (this._Object_to_Follow != null) {
+            return this._Object_to_Follow.IsActive() && this._IsInVisionRange(this._Object_to_Follow);
         }
         return false;
     }
 
     _RandomMove() {
-        this.AddForce(new Force(BaseAcceleration * 0.5, Randomizer.GetRandomInt(0, 360)));
+        this.AddForce(new Force(BaseAcceleration * 0.25, Randomizer.GetRandomInt(0, 360)));
     }
 
     _TrySeekBuff(inv_items_pool) {
@@ -644,7 +672,8 @@ class EnemyPlayer extends Player {
         let vec1 = this.GetPosition();
         let vec2 = this._Object_to_Follow.GetPosition();
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
-        this.AddForce(new Force(BaseAcceleration * 0.25, calc_angle));
+        this.curforceangle = calc_angle;
+        this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));
     }
 
     _FollowPlayer() {
@@ -654,12 +683,13 @@ class EnemyPlayer extends Player {
         let vec2 = this._Object_to_Follow.GetPosition();
         let distance = Point.Distance(vec1, vec2);
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
+        this.curforceangle = calc_angle;
         if (distance < 300) //if player is too close, dodge shells, don't get closer
         {
-            this._RandomMove(obj);
+            this._RandomMove();
         }
         else
-            this.AddForce(new Force(BaseAcceleration * 0.25, calc_angle));
+            this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));
 
 
     }

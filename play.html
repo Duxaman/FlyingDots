@@ -195,6 +195,7 @@
         function OnGameOver(PlayerName, SavedTime, Score) {
             window.removeEventListener('keydown', HandleInput);
             clearTimeout(Timer);
+            alert("GAME OVER\r\n" + PlayerName + "\r\n Score: " + Score + "\r\n");
             //save result
             //redirect to leaderboards page
         }
