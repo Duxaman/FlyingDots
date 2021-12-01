@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="utf8">
+    <meta name="robots" content="noindex" />
     <link rel="stylesheet" href="style.css">
     <title>Flying Dots - Game</title>
 </head>
@@ -109,6 +110,7 @@
                 let size = new Point(window.innerWidth, window.innerHeight);
                 document.getElementsByClassName('settings')[0].style.display = 'none';
                 InitBoxes();
+                SelectedInvInd = null;
                 GameObj = new Game(size, OnGameOver, name, diffvalue);
                 GameObj.Start();
                 window.addEventListener('keydown', HandleInput);
@@ -158,7 +160,7 @@
             for (let i = InventorySize - 1; i >= inv.length; --i) {  //clear others inv items
                 ClearInvItemUI(i);
             }
-            if (SelectedInvInd !== undefined) {
+            if (SelectedInvInd !== null) {
                 if (SelectedInvInd > inv.length - 1) //if item has been removed
                 {
                     if (inv.length > 0) {
@@ -166,7 +168,7 @@
                         SelectInvItemUi(SelectedInvInd); //select last item
                     }
                     else {
-                        SelectedInvInd = undefined;      //or set selected as undefined
+                        SelectedInvInd = null;      //or set selected as undefined
                     }
                 }
             }
@@ -184,7 +186,7 @@
 
         function SelectInvItemUi(ind) {
             if (InvBox[ind].innerText !== '0') {
-                if (SelectedInvInd !== undefined)
+                if (SelectedInvInd !== null)
                     InvBox[SelectedInvInd].style.removeProperty('border-color'); //unselect previous item in ui if it exists
                 SelectedInvInd = ind;
                 InvBox[SelectedInvInd].style.borderColor = "yellow"; //select new item
@@ -196,8 +198,8 @@
             window.removeEventListener('keydown', HandleInput);
             clearTimeout(Timer);
             alert("GAME OVER\r\n" + PlayerName + "\r\n Score: " + Score + "\r\n");
-            //save result
-            //redirect to leaderboards page
+            document.getElementById(PlayAreaId).innerHTML = "";
+            ShowSettings();
         }
 
     </script>

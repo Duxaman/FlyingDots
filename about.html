@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" href="style.css">
+    <title>Flying Dots - About</title>
+</head>
+
+<body>
+    <div id='about'>
+        <h1>Flying Dots</h1>
+        <img src='screen.jpg'>
+        <hr>
+        <h3>Controls</h3>
+        <div id='controls'>
+        </div>
+        <a href="main.html">Back</a> |
+        <a href="http://github.com/duxaman">My Github</a>
+        <script src="js/Constants.js"></script>
+        <script>
+            let element = document.getElementById('controls');
+            element.innerHTML += 'MoveUpBtn = <mark>\'' + MoveUpBtn + '\'</mark><br>';
+            element.innerHTML += 'MoveDownBtn = <mark>\'' + MoveDownBtn + '\'</mark><br>';
+            element.innerHTML += 'MoveLeftBtn = <mark>\'' + MoveLeftBtn + '\'</mark><br>';
+            element.innerHTML += 'MoveRightBtn = <mark>\'' + MoveRightBtn + '\'</mark><br>';
+            element.innerHTML += 'FirstInvBtn = <mark>\'' + FirstInvBtn + '\'</mark><br>';
+            element.innerHTML += 'SecondInvBtn = <mark>\'' + SecondInvBtn + '\'</mark><br>';
+            element.innerHTML += 'ThirdInvBtn = <mark>\'' + ThirdInvBtn + '\'</mark><br>';
+            element.innerHTML += 'ForthInvBtn = <mark>\'' + ForthInvBtn + '\'</mark><br>';
+            element.innerHTML += 'ActivateItemBtn = <mark>\'' + ActivateItemBtn + '\' / \'LeftMouseBtn\'</mark><br>';
+        </script>
+    </div>
+</body>
+
+</html>

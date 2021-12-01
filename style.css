@@ -1,4 +1,4 @@
-.menu, .settings {
+.menu, .settings, #about {
     background-color: lightsalmon;
     font-family: Arial;
     font-weight: bold;
@@ -6,6 +6,19 @@
     border-style: dashed;
     overflow: hidden;
     padding: 0;
+}
+
+#about {
+    text-align: center;
+}
+
+#about #controls {
+    text-align: left;
+    padding: 10px;
+}
+
+#about a {
+    width: 50%;
 }
 
 .settings {
@@ -25,7 +38,7 @@
     margin: 10px;
 }
 
-#mainmenu {
+#mainmenu, #about {
     margin-left: 40%;
     margin-top: 200px;
     width: 20%;

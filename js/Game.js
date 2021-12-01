@@ -71,10 +71,17 @@ class ObjectPool {
     }
 
 
+    /**
+     * Возвращает массив неактивных элементов инвентаря
+     * @returns 
+     */
     GetInactiveInvItems() {
         return this.InvItems.filter(obj => !obj.IsActive())
     }
 
+    /**
+     * Удаляет все неактивные элементы из пулы объектов
+     */
     ClearInactiveItems() {
         this.Players = this.Players.filter(obj => obj.IsActive()); //remove inactive elements
         this.Shells = this.Shells.filter(obj => obj.IsActive());
@@ -139,8 +146,16 @@ class Game {
          * Размер игрового поля
          */
         this._FieldSize = FieldSize;
+        /**
+         * Имя игрока
+         */
         this._PlayerName = PlayerName;
+        /**
+         * Объект используемый для вывода объектов в интерфейс пользователя
+         */
         this._Renderer = new Renderer();
+        this._KeyBoardListener = (event) => this._HandlePlayerMovement(event);
+        this._MouseListener = (event) => this._HandlePlayerMouse(event);
     }
 
     /**
@@ -159,7 +174,8 @@ class Game {
         }
         this._StartTime = performance.now(); // write startgame time
         this._FrameTimer = setInterval(() => this._GameTick(), FrameInterval);
-        window.addEventListener('keydown', (event) => this._HandlePlayerMovement(event)); //watch player movements
+        window.addEventListener('keydown', this._KeyBoardListener); //watch player movements
+        document.getElementById(PlayAreaId).addEventListener('click', this._MouseListener);
     }
 
     /**
@@ -189,7 +205,7 @@ class Game {
             diff = performance.now() - this._StartTime;
         }
         else {
-            diff = performance.now() - this._SavedTime;
+            diff = this._SavedTime + performance.now() - this._StartTime;
         }
         let sec = Math.floor(diff / 1000);
         let hrs = Math.floor(sec / 3600);
@@ -211,6 +227,10 @@ class Game {
 
     }
 
+    /**
+     * Вовзращает текущий счет
+     * @returns 
+     */
     GetScore() {
         return this._Score;
     }
@@ -223,7 +243,7 @@ class Game {
     }
 
     /**
-     * Возвращает массив пар ид элемента инвентаря - количество для каждого слота инвенторя игрока
+     * Возвращает массив пар ид элемента инвентаря - количество для каждого слота инвентаря игрока
      */
     GetInvStat() {
         let res = []
@@ -232,6 +252,14 @@ class Game {
             res.push([val.GetAssetId(), val.Amount]);
         }
         return res;
+    }
+
+    _HandlePlayerMouse(event) {
+        let res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player, new Point(event.clientX, event.clientY));
+        if (res !== undefined) {
+            //add new objects to map
+            this._GameObjects.Shells.push(res);
+        }
     }
 
     /**
@@ -280,15 +308,16 @@ class Game {
      * Останавливает таймер обновления карты, сохраняя текущее время игры
      */
     _SuspendGame() {
-        this._EndTime = performance.now; //write player time
+        this._EndTime = performance.now(); //write player time
         if (this._SavedTime === null) {
             this._SavedTime = this._EndTime - this._StartTime;
         }
         else {
             this._SavedTime += this._EndTime - this._StartTime;
         }
-        clearTimeout(this._FrameTimer); //stop game timer
-        window.removeEventListener('keydown', this._HandlePlayerMovement); //stop watching for user input
+        clearTimeout(this._FrameTimer); //stop game timer 
+        window.removeEventListener('keydown', this._KeyBoardListener); //stop watching for user input
+        document.getElementById(PlayAreaId).removeEventListener('click', this._MouseListener);
     }
 
     /**
@@ -306,7 +335,7 @@ class Game {
         if (!GameOver) {
             let deadenemies = this._GameObjects.GetInactivePlayers().length;
             if (deadenemies > 0) {
-                this._Score += ScoreForOne * (this._GameObjects.GetInactivePlayers().length - 1);
+                this._Score += ScoreForOne * deadenemies;
 
             }
             this._Despawn();
@@ -335,7 +364,7 @@ class Game {
         let MaxHP;
         if (this._Difficulty === Difficulty.Easy) {
             BuffsToSpawn = Randomizer.GetRandomInt(0, MaxBuffAmountEasy - CurrentBuffs);
-            EnemiesToSpawn = Randomizer.GetRandomInt(1, MaxEnemyEasy - CurrentEnemies);
+            EnemiesToSpawn = Randomizer.GetRandomInt(0, MaxEnemyEasy - CurrentEnemies);
             WeaponToSpawn = Randomizer.GetRandomInt(0, MaxWeaponAmountEasy - CurrentWeapons);
             MaxHP = MaxEnemyHPEasy;
         } else
@@ -408,6 +437,11 @@ class Renderer {
      * @param {*} array - массив элементов игры
      */
     RemoveElements(array) {
+        /**
+         *  Снаряды и некоторые другие элементы добавляются на карту между обновлениями кадра,
+         *  если сразу после добавления элемент помечен на удаление, то он ни разу не будет выведен,
+         *  а значит его не будет на странице, поэтому сначала проверяем каждый элемент на null 
+         *  */
         for (const obj of array) {
             let el = document.getElementById(obj.GetId());
             if (el !== null) el.remove();
@@ -420,20 +454,20 @@ class Renderer {
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
-                if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
+                //if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
             }
             else {
                 element = this._CreateElement(obj);
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
-                if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
+                //if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
                 this._PlayArea.appendChild(element);
             }
         }
     }
 
-    _SetDebugProp(element, state, curforceangle) {
+    /*_SetDebugProp(element, state, curforceangle) {
         element.innerHTML = '<p>' + state + ' (' + curforceangle + ') </p > '; //not the best solution
-    }
+    }*/
 
     _SetProperties(element, name, hp) {
         element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ') </p > '; //not the best solution
@@ -447,7 +481,7 @@ class Renderer {
         let element = document.createElement('div');
         element.setAttribute('id', obj.GetId());
         element.setAttribute('class', obj.GetAssetId());
-        if (obj instanceof InventoryItem) { //no the best solutuion
+        if (obj instanceof InventoryItem) { //sets the size of icon smaller
             element.classList.add('Map');
         }
         this._SetPosition(element, obj.GetPosition(), obj.GetRadius());

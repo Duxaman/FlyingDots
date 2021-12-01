@@ -211,7 +211,7 @@ class WeaponItem extends InventoryItem {
         this._ShellTemplate = shelltemplate;
     }
 
-    ActivateItem(PlayerObj) {
+    ActivateItem(PlayerObj, ActivationPoint) {
         //create shell with the same coordinates and angle that player have
         if (this.Amount > 0) {
             let PlayerPos = PlayerObj.GetPosition();
@@ -219,7 +219,11 @@ class WeaponItem extends InventoryItem {
             let shell = new Shell(Pos, GUID.CreateGuid(), this._ShellTemplate.GetAssetId(),
                 this._ShellTemplate.GetRadius(), this._ShellTemplate.GetMass(), PlayerObj.MaxYPos, PlayerObj.MaxXPos,
                 this._ShellTemplate.GetMaxDistance(), this._ShellTemplate.GetDamage(), PlayerObj.GetId());
-            shell.AddForce(new Force(4, 180 + (180 - PlayerObj.GetAngle()))); //rotate coordinate system first, in order to correct y angle
+            let angle = PlayerObj.GetAngle();
+            if (ActivationPoint !== undefined) {
+                angle = Point.VectorNormalAngle(Pos, ActivationPoint);
+            }
+            shell.AddForce(new Force(4, 180 + (180 - angle))); //rotate coordinate system first, in order to correct y angle
             this.Amount -= 1;
             return shell;
         }
@@ -316,24 +320,16 @@ class MovableObject extends GameObject {
         }
         //correct coordinates with restrincted maxvalue
         if (this._Position.X < 0) {
-            this._Position.X = 0;
-            //this._Position.X = this.MaxXPos + this._Position.X;
-            this.FlushForces(); //do not let the body to gain much speed
+            this._Position.X = this.MaxXPos + this._Position.X;
         }
         if (this._Position.X > this.MaxXPos) {
-            this._Position.X = this.MaxXPos;
-            //this._Position.X = this._Position.X - this.MaxXPos;
-            this.FlushForces(); //do not let the body to gain much speed
+            this._Position.X = this._Position.X - this.MaxXPos;
         }
         if (this._Position.Y < 0) {
-            this._Position.Y = 0;
-            //this._Position.Y = this.MaxYPos + this._Position.Y;
-            this.FlushForces(); //do not let the body to gain much speed
+            this._Position.Y = this.MaxYPos + this._Position.Y;
         }
         if (this._Position.Y > this.MaxYPos) {
-            this._Position.Y = this.MaxYPos;
-            //this._Position.Y = this._Position.Y - this.MaxYPos;
-            this.FlushForces(); //do not let the body to gain much speed
+            this._Position.Y = this._Position.Y - this.MaxYPos;
         }
 
     }
@@ -365,7 +361,7 @@ class MovableObject extends GameObject {
         if (this._OldPos !== undefined) {
             if (this._OldPos === this._Position) {
                 this._Position.X -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1)); //teleport to random spot
-                this._Position.Y -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1));  //TODO:!!!
+                this._Position.Y -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1));
             }
             this._Position = this._OldPos;
         }
@@ -519,10 +515,15 @@ class EnemyPlayer extends Player {
         super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP);
         this._Object_to_Follow = null;
         this._AttackCounter = null;
-        this.State = "None";
-        this.curforceangle = "None";
+        //this.State = "None";
+        //this.curforceangle = "None";
     }
 
+    /**
+     * Анализирует пул игровых объектов и принимает решение дальнейших действиях вражеского игрока
+     * @param {*} objectpool 
+     * @returns 
+     */
     Analyze(objectpool) {
         this._AttackCounter++;
         let can_attack = false;
@@ -532,74 +533,125 @@ class EnemyPlayer extends Player {
         }
         let need_heal = false;
         let need_weapon = false;
-        if ((this.GetHP() * 100 / this.GetMaxHP()) < 50) {
+        if ((this.GetHP() * 100 / this.GetMaxHP()) < 50) { //если хп < 50%, срочно ищем хилку
             need_heal = true;
         }
         need_weapon = !this._WeaponCheck();
-        if (this._CanFollowObject()) {
+        if (this._CanFollowObject()) {   //если мы можем продолжать полет за текущим телом
+            /**
+             * Если нам необходимо лечение, проверяем,
+             * Если то за чем мы летим хилка, то продолжаем лететь и выходим
+             * Если это не хилка, пытаемся найти хилку, если находим, следуем за ней, иначе переходим к следующим нуждам
+             */
             if (need_heal) {
-                this.State = "Follow Heal";
+                //this.State = "Follow Heal";
                 if (!(this._Object_to_Follow instanceof BuffItem)) {
                     let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
                     if (res !== undefined) {
                         this._Object_to_Follow = res;
+                        this._FollowBuff();
+                        return;
                     }
                 }
-                this._FollowBuff();
-                return;
+                else {
+                    this._FollowBuff();
+                    return;
+                }
             }
+            /**
+             * Если нам необходимо оружие, проверяем,
+             * Если то за чем мы летим оружие, то продолжаем лететь и выходим
+             * Если это не оружие, пытаемся найти оружие, если находим, следуем за ним, иначе переходим к следующим нуждам
+             */
             if (need_weapon) {
-                this.State = "Follow Weapon";
+                //this.State = "Follow Weapon";
                 if (!(this._Object_to_Follow instanceof WeaponItem)) {
                     let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
                     if (res !== undefined) {
                         this._Object_to_Follow = res;
+                        this._FollowBuff();
+                        return;
                     }
                 }
-                this._FollowBuff();
-                return;
+                else {
+                    this._FollowBuff();
+                    return;
+                }
+
             }
-            this.State = "Follow Player";
-            this._FollowPlayer();
-            if (can_attack) {
-                this._Attack(objectpool.Shells);
+            else {
+                /**
+                 * Если у нас есть оружие и не нужно лечение, проверяем
+                 * Если мы следуем за игроком, то продолжаем следовать и выходим
+                 * Если это не игрок, пытаемся найти игрока, если находим, следуем за ним, иначе переходим к следующим нуждам
+                 */
+                //this.State = "Follow Player";
+                if (!(this._Object_to_Follow instanceof Player)) {
+                    let res = this._IsInVisionRange(objectpool.Player) ? objectpool.Player : null;
+                    if (res !== null) {
+                        this._Object_to_Follow = res;
+                        this._FollowPlayer();
+                        return;
+                    }
+                }
+                else {
+                    this._FollowPlayer();
+                    if (can_attack) {
+                        this._Attack(objectpool.Shells);
+                    }
+                    return;
+                }
             }
+            /**
+             * Если все что выше не сработало, летим случайно
+             */
+            //this.State = "RandomMove";
+            this._RandomMove();
         }
-        else {
+        else { //если мы не можем продолжать полет за текущим телом, находим новое тело
             this._Object_to_Follow = null;
             if (need_heal) {
+                /**
+                 * Если нам нужно лечение, пытаемся найти хилку, если находим выбираем ее и выходим, иначе переходим к следующим нуждам
+                 */
                 let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof BuffItem));
                 if (res !== undefined) {
-                    this.State = "Follow Heal";
                     this._Object_to_Follow = res;
-                    this._FollowBuff();
                     return;
                 }
             }
             if (need_weapon) {
+                /**
+                 * Если нам нужно оружие, пытаемся найти оружие, если находим выбираем его и выходим, иначе переходим к следующим нуждам
+                 */
                 let res = this._TrySeekBuff(objectpool.InvItems.filter(x => x instanceof WeaponItem));
                 if (res !== undefined) {
-                    this.State = "Follow Weapon";
                     this._Object_to_Follow = res;
-                    this._FollowBuff();
                     return;
                 }
             }
-            let res = this._TrySeekPlayer(objectpool.Player);
-            if (res !== undefined) {
-                this.State = "Follow Player";
-                this._Object_to_Follow = res;
-                this._FollowPlayer();
-                if (can_attack) {
-                    this._Attack(objectpool.Shells);
+            else {
+                /**
+                 * Если нам не нужно лечение и есть оружие, пытаемся найти игрока, если находим выбираем его и выходим, иначе переходим к следующим нуждам
+                 */
+                let res = this._IsInVisionRange(objectpool.Player) ? objectpool.Player : null;
+                if (res !== null) {
+                    this._Object_to_Follow = res;
+                    return;
                 }
-                return;
             }
-            this.State = "RandomMove";
+            /** 
+             * Скитаемся в надежде что-то найти
+            */
+            //this.State = "RandomMove";
             this._RandomMove();
         }
     }
 
+    /**
+     * Возвращает true, если преследуемый объект валиден, и можно продолжать его преследование
+     * @returns 
+     */
     _CanFollowObject() {
         if (this._Object_to_Follow != null) {
             return this._Object_to_Follow.IsActive() && this._IsInVisionRange(this._Object_to_Follow);
@@ -607,23 +659,31 @@ class EnemyPlayer extends Player {
         return false;
     }
 
+    /**
+     * Заставляет вражеского игрока двигаться в случайную сторону
+     */
     _RandomMove() {
         this.AddForce(new Force(BaseAcceleration * 0.25, Randomizer.GetRandomInt(0, 360)));
     }
 
+    /**
+     * Вовзращает первую найденную на карте лечилку в поле зрения вражеского игрока
+     * @param {*} inv_items_pool - пул элементов инвентаря
+     * @returns 
+     */
     _TrySeekBuff(inv_items_pool) {
         for (const element of inv_items_pool) {
-            if (this._IsInVisionRange(this, element)) {
+            if (this._IsInVisionRange(element)) {
                 return element;
             }
         }
     }
 
-    _TrySeekPlayer(player) {
-        if (this._IsInVisionRange(this, player))
-            return player;
-    }
-
+    /**
+     * Проверяет, находится ли цель в пределах зоны видимости вражеского игрока
+     * @param {*} goal 
+     * @returns 
+     */
     _IsInVisionRange(goal) {
         if (Point.Distance(this.GetPosition(), goal.GetPosition()) <= EnemyVisionRange) {
             return true;
@@ -631,6 +691,10 @@ class EnemyPlayer extends Player {
         return false;
     }
 
+    /**
+     * Заставляет вражеского игроа предпринять попытку излечить себя, используя вещи инвентаря. В случае успешного лечения возвращает true
+     * @returns 
+     */
     _Heal() {
         /**
          * iterate over inventory, find first heal, activate it, return true
@@ -647,10 +711,21 @@ class EnemyPlayer extends Player {
         return false;
     }
 
+    /**
+     * Заставляет вражеского игрока активировать выбранный элемент инвентаря с оружием
+     * @param {*} shellpool 
+     */
     _Attack(shellpool) {
-        shellpool.push(this.Inventory.ActivateItem(this));
+        let res = this.Inventory.ActivateItem(this);
+        if (res !== undefined) {
+            shellpool.push(res);
+        }
     }
 
+    /**
+     * Заставляет вражеского игрока предпринять попытку активировать оружие активным элементом инвентаря. В случае успеха возвращает true
+     * @returns 
+     */
     _WeaponCheck() {
         /**
          * iterate over inventory, find first weapon, select it, return true
@@ -666,16 +741,22 @@ class EnemyPlayer extends Player {
         return false;
     }
 
+    /**
+     * Заставляет вражеского игрока начать следовать за объектом на карте
+     */
     _FollowBuff() {
         //add forces towards goal
         //determine angle 
         let vec1 = this.GetPosition();
         let vec2 = this._Object_to_Follow.GetPosition();
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
-        this.curforceangle = calc_angle;
+        //this.curforceangle = calc_angle;
         this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));
     }
 
+    /**
+     * Заставляет вражеского игрока начать преследование игрока
+     */
     _FollowPlayer() {
         //add forces towards goal
         //determine angle 
@@ -683,14 +764,14 @@ class EnemyPlayer extends Player {
         let vec2 = this._Object_to_Follow.GetPosition();
         let distance = Point.Distance(vec1, vec2);
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
-        this.curforceangle = calc_angle;
-        if (distance < 300) //if player is too close, dodge shells, don't get closer
+        //this.curforceangle = calc_angle;
+        if (distance > 400) //if player is too close don't get closer
         {
-            this._RandomMove();
-        }
-        else
             this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));
-
+        }
+        {
+            this.AddForce(new Force(BaseAcceleration * 0.002, 180 + (180 - calc_angle))); //продолжаем двигаться к цели, но медленно чтобы сохранять угол
+        }
 
     }
 }

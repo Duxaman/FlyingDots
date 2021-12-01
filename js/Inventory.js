@@ -35,9 +35,9 @@ class Inventory {
 			this._SelectedIndex = id;
 		}
 	}
-	ActivateItem(Player) {
+	ActivateItem(Player, ActivationPoint) {
 		if (this._SelectedIndex !== null) {
-			var ActivationResult = this._Items[this._SelectedIndex].ActivateItem(Player);
+			var ActivationResult = this._Items[this._SelectedIndex].ActivateItem(Player, ActivationPoint);
 			if (this._Items[this._SelectedIndex].Amount === 0) {
 				this._Items.splice(this._SelectedIndex, 1);
 				if (this._SelectedIndex > this.Count() - 1) {

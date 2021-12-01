@@ -10,12 +10,6 @@ class FrameProcessor {
         let len4 = objectpool.StaticBodies.length;
         let len5 = objectpool.MovableBodies.length;
         for (let i = 0; i < len; ++i) {
-            for (let j = 0; j < len; ++j) {
-                if (j <= i) continue;
-                if (this._IsReachable(objectpool.Players[i], objectpool.Players[j])) {
-                    this._ApplyPlayerPlayerCollision(objectpool.Players[i], objectpool.Players[j]);
-                }
-            }
             for (let j = 0; j < len2; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.Shells[j])
                     && objectpool.Shells[j].GetFatherID() !== objectpool.Players[i].GetId()) {
@@ -58,12 +52,6 @@ class FrameProcessor {
         return r >= Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
     }
 
-    static _ApplyPlayerPlayerCollision(player, enemy) {
-        //player.FlushForces();
-        //enemy.FlushForces();
-        //player.Revert();
-        //enemy.Revert();
-    }
     static _ApplyPlayerShellCollision(player, shell) {
         shell.Deactivate();
         player.ModifyHP(-shell.GetDamage());
