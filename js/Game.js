@@ -91,6 +91,58 @@ class ObjectPool {
 }
 
 /**
+ * Представляет карту активации действий для управления игроком
+ */
+class ControlActivationMap {
+    constructor() {
+        this._ActivationMap = new Map();
+        this._ActivationMap.set(FirstInvBtn, false);
+        this._ActivationMap.set(SecondInvBtn, false);
+        this._ActivationMap.set(ThirdInvBtn, false);
+        this._ActivationMap.set(ForthInvBtn, false);
+        this._ActivationMap.set(ActivateItemBtn, false);
+        this._ActivationMap.set(MoveUpBtn, false);
+        this._ActivationMap.set(MoveDownBtn, false);
+        this._ActivationMap.set(MoveLeftBtn, false);
+        this._ActivationMap.set(MoveRightBtn, false);
+    }
+
+    /**
+     * Задает действие назначенное на клавишу key как активное
+     * @param {*} key 
+     * @returns 
+     */
+    ActivateControl(key) {
+        if (this._ActivationMap.has(key)) {
+            this._ActivationMap.set(key, true);
+        }
+    }
+
+    /**
+     * Задает действие назначенное на клавишу key как неактивное
+     * @param {*} key 
+     * @returns 
+     */
+    DeactivateControl(key) {
+        if (this._ActivationMap.has(key)) {
+            this._ActivationMap.set(key, false);
+        }
+    }
+
+    /**
+     * Возвращает состояние активации действия назначенного на клавишу key
+     * @param {*} key 
+     * @returns 
+     */
+    GetControlState(key) {
+        if (this._ActivationMap.has(key)) {
+            return this._ActivationMap.get(key);
+        }
+    }
+}
+
+
+/**
  * Управляющий объект игры
  */
 class Game {
@@ -154,8 +206,28 @@ class Game {
          * Объект используемый для вывода объектов в интерфейс пользователя
          */
         this._Renderer = new Renderer();
-        this._KeyBoardListener = (event) => this._HandlePlayerMovement(event);
+        this._ControlMap = new ControlActivationMap();
+        this._KeyDownListener = (event) => this._ControlMap.ActivateControl(event.key);
+        this._KeyUpListener = (event) => this._ControlMap.DeactivateControl(event.key);
         this._MouseListener = (event) => this._HandlePlayerMouse(event);
+    }
+
+    /**
+     * Активирует слушателей клавиатуры и мыши
+     */
+    _StartListenInput() {
+        window.addEventListener('keydown', this._KeyDownListener);
+        window.addEventListener('keyup', this._KeyUpListener);
+        document.getElementById(PlayAreaId).addEventListener('click', this._MouseListener);
+    }
+
+    /**
+     * Деактивирует слушателей клавиатуры и мыши
+     */
+    _StopListenInput() {
+        window.removeEventListener('keydown', this._KeyDownListener);
+        window.removeEventListener('keyup', this._KeyUpListener);
+        document.getElementById(PlayAreaId).removeEventListener('click', this._MouseListener);
     }
 
     /**
@@ -174,8 +246,7 @@ class Game {
         }
         this._StartTime = performance.now(); // write startgame time
         this._FrameTimer = setInterval(() => this._GameTick(), FrameInterval);
-        window.addEventListener('keydown', this._KeyBoardListener); //watch player movements
-        document.getElementById(PlayAreaId).addEventListener('click', this._MouseListener);
+        this._StartListenInput();
     }
 
     /**
@@ -263,45 +334,32 @@ class Game {
     }
 
     /**
-     * Отслеживает нажатие клавиш и переводит их в событие управления игроком
-     * @param {*} event - событие keydown
+     * Анализирует карту активации элементов управления текущего кадра и применяет активные элементы
      */
-    _HandlePlayerMovement(event) {
-        let res;
-        switch (event.key) {
-            case FirstInvBtn:
-                this._GameObjects.Player.Inventory.SelectItem(0);
-                break;
-            case SecondInvBtn:
-                this._GameObjects.Player.Inventory.SelectItem(1);
-                break;
-            case ThirdInvBtn:
-                this._GameObjects.Player.Inventory.SelectItem(2);
-                break;
-            case ForthInvBtn:
-                this._GameObjects.Player.Inventory.SelectItem(3);
-                break;
-            case ActivateItemBtn:
-                res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player);
-                break;
-            case MoveUpBtn:
-                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 270));
-                break;
-            case MoveDownBtn:
-                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 90));
-                break;
-            case MoveLeftBtn:
-                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 180));
-                break;
-            case MoveRightBtn:
-                this._GameObjects.Player.AddForce(new Force(BaseAcceleration, 0));
-                break;
-            default: break;
+    _HandlePlayerMovement() {
+        if (this._ControlMap.GetControlState(FirstInvBtn))
+            this._GameObjects.Player.Inventory.SelectItem(0);
+        if (this._ControlMap.GetControlState(SecondInvBtn))
+            this._GameObjects.Player.Inventory.SelectItem(1);
+        if (this._ControlMap.GetControlState(ThirdInvBtn))
+            this._GameObjects.Player.Inventory.SelectItem(2);
+        if (this._ControlMap.GetControlState(ForthInvBtn))
+            this._GameObjects.Player.Inventory.SelectItem(3);
+        if (this._ControlMap.GetControlState(ActivateItemBtn)) {
+            let res = this._GameObjects.Player.Inventory.ActivateItem(this._GameObjects.Player);
+            if (res !== undefined) {
+                //add new objects to map
+                this._GameObjects.Shells.push(res);
+            }
         }
-        if (res !== undefined) {
-            //add new objects to map
-            this._GameObjects.Shells.push(res);
-        }
+        if (this._ControlMap.GetControlState(MoveUpBtn))
+            this._GameObjects.Player.AddForce(new Force(PlayerAcceleration, 270));
+        if (this._ControlMap.GetControlState(MoveDownBtn))
+            this._GameObjects.Player.AddForce(new Force(PlayerAcceleration, 90));
+        if (this._ControlMap.GetControlState(MoveLeftBtn))
+            this._GameObjects.Player.AddForce(new Force(PlayerAcceleration, 180));
+        if (this._ControlMap.GetControlState(MoveRightBtn))
+            this._GameObjects.Player.AddForce(new Force(PlayerAcceleration, 0));
     }
 
     /**
@@ -316,14 +374,14 @@ class Game {
             this._SavedTime += this._EndTime - this._StartTime;
         }
         clearTimeout(this._FrameTimer); //stop game timer 
-        window.removeEventListener('keydown', this._KeyBoardListener); //stop watching for user input
-        document.getElementById(PlayAreaId).removeEventListener('click', this._MouseListener);
+        this._StopListenInput();
     }
 
     /**
      * Обрабатывает все события игры в текущем кадре
      */
     _GameTick() {
+        this._HandlePlayerMovement();
         this._GameObjects.MoveObjects();
         this._GameObjects.EnemiesAnalyze();
         this._GameObjects.MaintainForces();
@@ -454,20 +512,14 @@ class Renderer {
             if (element !== null) {
                 this._SetPosition(element, obj.GetPosition(), obj.GetRadius());
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
-                //if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
             }
             else {
                 element = this._CreateElement(obj);
                 if (obj instanceof Player) this._SetProperties(element, obj.GetName(), obj.GetHP());
-                //if (obj instanceof EnemyPlayer) this._SetDebugProp(element, obj.State, obj.curforceangle);
                 this._PlayArea.appendChild(element);
             }
         }
     }
-
-    /*_SetDebugProp(element, state, curforceangle) {
-        element.innerHTML = '<p>' + state + ' (' + curforceangle + ') </p > '; //not the best solution
-    }*/
 
     _SetProperties(element, name, hp) {
         element.innerHTML = '<p>' + name + ' (' + Math.round(hp) + ') </p > '; //not the best solution
