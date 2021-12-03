@@ -248,10 +248,6 @@ class BuffItem extends InventoryItem {
         this._Power = Power;
     }
 
-    GetPower() {
-        return this._Power;
-    }
-
     ActivateItem(PlayerObj) {
         if (PlayerObj instanceof Player) {
             if (this.Amount > 0) {
@@ -519,8 +515,6 @@ class EnemyPlayer extends Player {
         super(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP);
         this._Object_to_Follow = null;
         this._AttackCounter = null;
-        //this.State = "None";
-        //this.curforceangle = "None";
     }
 
     /**
@@ -647,7 +641,6 @@ class EnemyPlayer extends Player {
             /** 
              * Скитаемся в надежде что-то найти
             */
-            //this.State = "RandomMove";
             this._RandomMove();
         }
     }
@@ -754,7 +747,6 @@ class EnemyPlayer extends Player {
         let vec1 = this.GetPosition();
         let vec2 = this._Object_to_Follow.GetPosition();
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
-        //this.curforceangle = calc_angle;
         this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));
     }
 
@@ -768,7 +760,6 @@ class EnemyPlayer extends Player {
         let vec2 = this._Object_to_Follow.GetPosition();
         let distance = Point.Distance(vec1, vec2);
         let calc_angle = Point.VectorNormalAngle(vec1, vec2);
-        //this.curforceangle = calc_angle;
         if (distance > 400) //if player is too close don't get closer
         {
             this.AddForce(new Force(BaseAcceleration * 0.25, 180 + (180 - calc_angle)));

@@ -1,0 +1,477 @@
+<diagram program="umletino" version="14.4.0-SNAPSHOT"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>430</x><y>730</y><w>360</w><h>280</h></coordinates><panel_attributes>GameObject
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Number _Radius
+- Number _Mass
+- Bool: _State;
+--
++ constructor(Position, Id, AssetId, Radius, Mass)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ IsActive() #returns state in order to despawn
++ Deactivate()
++ GetRadius()
++ GetMass()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>880</x><y>550</y><w>330</w><h>280</h></coordinates><panel_attributes>/InventoryItem/
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Number _Radius
+- Number _Mass
+- Bool: _State;
++ Number: Amount 
+--
++ constructor(Position, Id, AssetId, Amount) 
++ GetPosition()
++ GetAssetId()
++ GetId()
++ ActivateItem(PlayerObj)
++ IsActive()
++ Deactivate() //mark it for deletion
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1350</x><y>240</y><w>390</w><h>260</h></coordinates><panel_attributes>WeaponItem
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Shell: _InnerShell
+- Bool: _State;
++ Number: Amount 
+--
++ constructor(Position, Id, AssetId, Amount, shelltemplate)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ ActivateItem(PlayerObj, ActivationPoint) 
++ IsActive()
++ Deactivate() //mark it for deletion</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1290</x><y>780</y><w>450</w><h>420</h></coordinates><panel_attributes>MovableObject
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Bool: _State;
+- Number: _Radius
+- Number: _Mass
+- Point: _OldPos;
+- Number: _Angle
+- Force[]: _Forces
+- Number: _MaxYPos
+- Number: _MaxXPos
+--
++ MovableObject(Position, Id, AssetId, Radius, Mass, MaxY, MaxX) 
++ Move()
++ AddForce(Force)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ IsActive()
++ GetRadius()
++ GetMass()
++ GetAngle()
++ FlushForces()
++ Revert()
++ GetSpeedDt()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1860</x><y>840</y><w>590</w><h>580</h></coordinates><panel_attributes>Shell
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Bool: _State;
+- Number: _Radius
+- Number: _Mass
+- Point: _OldPos;
+- Number: _Angle
+- Force[]: _Forces
+- Number: _CurrentDistance
+- Number: _MaxDistance;
+- Number: _Damage
+- Number: _BaseForceAdded
+- Number:  _FatherID
+- Number: _MaxYPos
+- Number: _MaxXPos
+--
++ Shell(Position, Id, Radius, Mass, AssetId, MaxY, MaxX, MaxDistance, Damage, FatherID) 
++ Move()
++ AddForce(Force)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ IsActive()
++ GetRadius()
++ GetMass()
++ GetAngle()
++ GetDistance()
++ GetDamage()
++ FlushForces()
++ Revert()
++ GetSpeedDt()
++ GetFatherID() 
++ GetOldPos()
++ GetMaxDistance()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1350</x><y>510</y><w>370</w><h>260</h></coordinates><panel_attributes>BufItem
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
++ Number: Amount 
+- Bool: _State;
+- Number: _Power
+--
++ constructor (Position, Id, AssetId, Amount, Power)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ ActivateItem(PlayerObj)
++ IsActive()
++ Deactivate() //mark it for deletion
++ ActivateItem(PlayerObj)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1860</x><y>220</y><w>520</w><h>610</h></coordinates><panel_attributes>Player
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Bool: _State;
+- Number: _Radius
+- Number: _Mass
+- Point: _OldPos;
+- Number: _Angle
+- Force[]: _Forces
+- String: _Name
+- String: _Id;
+- Number: _MaxHP;
+- Number: _Health;
+- Number: _MaxYPos
+- Number: _MaxXPos
++ Inventory: Inventory
+--
++ constructor(Position, Id, AssetId, Radius, Mass, MaxY, MaxX, Name, MaxHP)  
++ Move()
++ AddForce(Force)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ IsActive()
++ GetRadius()
++ GetMass()
++ GetAngle()
++ ModifyHP(Points)
++ GetHP()
++ GetName();
++ GetMaxHP()
++ FlushForces()
++ Revert()
++ GetSpeedDt()
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>490</x><y>530</y><w>330</w><h>140</h></coordinates><panel_attributes>Point
+--
+Number: X;
+Number: Y;
+--
++ static Distance(Point A, Point B)
++ static VectorNormalAngle(VecAPoint, VecBPoint)</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>0</x><y>500</y><w>350</w><h>460</h></coordinates><panel_attributes>&lt;&lt;Enumeration&gt;&gt;
+AssetId
+--
+Players:
+    {
+        Player: "Body Ship Player",
+        Enemy: "Body Ship Enemy"
+    },
+    Bodies:
+    {
+        Star: "Body Star",
+        Asteroid: "Body Asteroid",
+    },
+    Shells:
+    {
+        LiteWeaponShell: "Body LiteWeaponShell",
+        FireWeaponShell: "Body FireWeaponShell",
+        HeavyWeaponShell: "Body HeavyWeaponShell"
+    },
+    Buffs: {
+        HealBuffItem: "Body HealBuffItem",
+    },
+    UI: {
+        LiteWeaponUI: "Body LiteWeaponUI",
+        FireWeaponUI: "Body FireWeaponUI",
+        HeavyWeaponUI: "Body HeavyWeaponUI",
+        HealBuffItemUI: "Body HealBuffItemUI"
+    }
+
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>350</x><y>770</y><w>100</w><h>30</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>530</x><y>660</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>780</x><y>670</y><w>120</w><h>160</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;140;50;140;50;10;100;10</additional_attributes></element><element><id>Relation</id><coordinates><x>780</x><y>800</y><w>530</w><h>170</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;50;10;50;150;510;150</additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>670</y><w>170</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;150;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>370</y><w>170</w><h>330</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;310;70;310;70;10;150;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1730</x><y>960</y><w>150</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;130;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1730</x><y>570</y><w>150</w><h>420</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;400;40;400;40;10;130;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1440</x><y>1240</y><w>150</w><h>60</h></coordinates><panel_attributes>Force
+--
+Number: Acceleration;
+Number: Angle;</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1510</x><y>1190</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1350</x><y>0</y><w>370</w><h>220</h></coordinates><panel_attributes>Inventory
+--
+- InventoryItem[] : _Items
+- Number: _MaxCapacity
+- Number: _SelectedIndex;
+--
++ constructor(MaxCapacity)
++ AddItem(invItem)
++ GetItemById(id)
++ ClearItems()
++ ClearItem(id)
++ ActivateItemById(id)
++ Count()
++ SelectItem(id)
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1710</x><y>130</y><w>380</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>360;90;360;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1030</x><y>130</y><w>340</w><h>440</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>320;10;10;10;10;420</additional_attributes></element><element><id>UMLClass</id><coordinates><x>850</x><y>1300</y><w>470</w><h>590</h></coordinates><panel_attributes>Game
+--
+_StartTime;
+_EndTime;
+_SavedTime;
+_FrameTimer;
+_GameOverCallback;
+_PauseMarker;
+_Score;
+_SpawnFrameCounter;
+_GameObjects;
+_Difficulty;
+_FieldSize;
+_PlayerName;
+_Renderer;
+_ControlMap;
+_KeyDownListener;
+_KeyUpListener;
+_MouseListener;
+--
++ Game(FieldSize, OnGameOver, PlayerName, Diff)
++ Start()
++ Pause()
++ Stop()
++ GetScore()
++ GetTime()
++ GetPlayerStat() 
++ GetInvStat()
+- _StartListenInput() 
+- _StopListenInput()
+- _HandlePlayerMouse(event)
+- _HandlePlayerMovement(event)
+- _SuspendGame()
+- _GameTick()
+- _SpawnItems()
+- _Despawn() 
+
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>600</x><y>1000</y><w>460</w><h>320</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>440;300;440;70;10;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1400</x><y>1380</y><w>370</w><h>160</h></coordinates><panel_attributes>Spawner
+--
+- static DefaultNames = []
+- static _DetermineSpawnPoint(mapsize)
+- static _ConstructBuff(MapPoint) 
+- static _ConstructWeapon(MapPoint)
+- static _ConstructEnemy(MapPoint)
++ static SpawnBuff(mapsize) 
++ static SpawnWeapon(mapsize)
++ static SpawnEnemy(MaxHp, mapsize) </panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1310</x><y>1440</y><w>110</w><h>30</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>90;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1400</x><y>1870</y><w>370</w><h>120</h></coordinates><panel_attributes>MapGenerator
+--
+
+--
+- static _GenerateStaticBody(Position)
+- static _GenerateMovableBody(Position, maxpos)
++ static GenerateMap(size)</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1270</x><y>1880</y><w>150</w><h>70</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>130;50;10;50;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>870</x><y>1160</y><w>150</w><h>110</h></coordinates><panel_attributes>&lt;&lt;Enumeration&gt;&gt;
+Difficulty
+--
+Easy,
+Medium,
+Hard,
+Extreme
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>930</x><y>1260</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1080</x><y>1210</y><w>240</w><h>60</h></coordinates><panel_attributes>Randoimizer
+--
++ static GetRandomInt(min, max)
++ static GetGaussRandom(mx, sx) </panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1310</x><y>1230</y><w>130</w><h>170</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;10;110;10;110;150</additional_attributes></element><element><id>Relation</id><coordinates><x>1200</x><y>1260</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>UMLNote</id><coordinates><x>3070</x><y>220</y><w>410</w><h>1140</h></coordinates><panel_attributes>constants
+
+const FrameInterval = 29 for firefox, 17 for others;
+const PlayAreaId = "workplace";
+const ScoreForOne = 100;
+const SpawnFrameTimeout = 300;
+const AttackFrameTimeout = 10;
+const MovableBodyForcesLimit = 30;
+const Friction = 0.006;
+const BaseRadius = 15;
+const BaseAcceleration = 0.10;
+const MovableBodiesMinAcceleration = BaseAcceleration * 0.1;
+const MovableBodiesMaxAcceleration = BaseAcceleration * 0.2;
+const MovableBodiesAngleVariance = 45;
+const MovableBodiesMaxMass = 1000;
+const MovableBodiesMaxRadius = 50;
+const StaticBodiesMaxMass = 1000;
+const StaticBodiesMaxRadius = 50;
+const PlayerAcceleration = BaseAcceleration * 0.4;
+const BaseMass = 100;
+const BaseShellMass = 2;
+const BaseShellRadius = 2;
+const BaseMaxHP = 500;
+const BaseDamage = 10;
+const BaseDistance = 300;
+const MaxStaticBodiesPerMap = 5;
+const MaxMovableBodiesPerMap = 5;
+const ShellMaxDistance = 600;
+const EnemyVisionRange = 900;
+const InventorySize = 4;
+const MinWeaponAm = 10;
+const MaxWeaponAm = 200;
+const ShellAcceleration = 18;
+const ShellCollisionTrack = ShellAcceleration;
+
+/*Controls */
+const MoveUpBtn = 'w';
+const MoveDownBtn = 's';
+const MoveLeftBtn = 'a';
+const MoveRightBtn = 'd';
+const FirstInvBtn = '1';
+const SecondInvBtn = '2';
+const ThirdInvBtn = '3';
+const ForthInvBtn = '4';
+const ActivateItemBtn = ' ';
+
+
+/**
+ * Difficulty settings
+ */
+const MaxEnemyEasy = 2;
+const MaxWeaponAmountEasy = 10;
+const MaxEnemyHPEasy = 100;
+const MaxBuffAmountEasy = 6;
+
+const MaxEnemyMedium = 4;
+const MaxWeaponAmountMedium = 12;
+const MaxEnemyHPMedium = 100;
+const MaxBuffAmountMedium = 6;
+
+const MaxEnemyHard = 6;
+const MaxWeaponAmountHard = 20;
+const MaxEnemyHPHard = 80;
+const MaxBuffAmountHard = 10;
+
+const MaxEnemyNuts = 10;
+const MaxWeaponAmountNuts = 30;
+const MaxEnemyHPNuts = 80;
+const MaxBuffAmountNuts = 15;</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>440</x><y>1570</y><w>320</w><h>410</h></coordinates><panel_attributes>UI
+--
+var GameObj;
+var Timer;
+var TimerState;
+var ScoreBox;
+var TimeBox;
+var HpBox;
+var HpBar;
+var InvBox;
+var SelectedInvInd;
+--
++ HandleInput(event) 
++ ShowSettings()
++ InitBoxes()
++ StartGame()
++ StopGame()
++ ToogleGamePause()
++ UpdateUI() 
++ UpdateHealthBar()
++ UpdateInventory() 
++ ClearInvItemUI(ind) 
++ DeselectInvItemUI(ind) 
++ SelectInvItemUi(ind) 
++ OnGameOver()
++ UpdateUI()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1600</y><w>120</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>10;10;100;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>180</x><y>1630</y><w>140</w><h>40</h></coordinates><panel_attributes>HTML</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>310</x><y>1640</y><w>150</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>130;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1860</x><y>1450</y><w>150</w><h>60</h></coordinates><panel_attributes>GUID
+--
++ static CreateGUID()</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1760</x><y>1460</y><w>120</w><h>30</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>100;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1920</x><y>1410</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>590</x><y>1950</y><w>30</w><h>30</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1400</x><y>1610</y><w>380</w><h>200</h></coordinates><panel_attributes>FrameProcessor
+--
+
+--
++ CaclulateFrame(ObjectPool)
+- _ApplyPlayerShellCollision(player, shell)
+- _ApplyPlayerInventoryItemCollision(player, inv_item)
+- _ApplyPlayerStaticBodyCollision(player)
+- _ApplyPlayerMovableBodyCollision(player)
+- _IsReachable(Obj1, Obj1)
+- _IsObjShellReachable(Obj, Shell)
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1310</x><y>1640</y><w>110</w><h>30</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>90;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>450</x><y>1310</y><w>310</w><h>240</h></coordinates><panel_attributes>ObjectPool
+--
++ Player
++ Players
++ Shells
++ StaticBodies 
++ MovableBodies
++ InvItems
+--
++ MoveObjects()
++ MaintainForces()
++ EnemiesAnalyze()
++ GetInactivePlayers()
++ GetInactiveShells() 
++ GetInactiveInvItems()
++ ClearInactiveItems() 
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1460</y><w>120</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes><additional_attributes>100;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>480</x><y>1140</y><w>280</w><h>150</h></coordinates><panel_attributes>Renderer
+--
+- _PlayArea;
+--
++ Render(objectpool) 
++ RemoveElements(array) 
+- _RenderPool(pool)
+- _SetProperties(element, name, hp) 
+- _SetPosition(element, position, radius)
+- _CreateElement(obj)
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>750</x><y>1220</y><w>120</w><h>150</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;10;60;10;60;130;100;130</additional_attributes></element><element><id>Relation</id><coordinates><x>1760</x><y>1500</y><w>190</w><h>430</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>170;10;170;410;10;410</additional_attributes></element><element><id>UMLClass</id><coordinates><x>2480</x><y>220</y><w>520</w><h>790</h></coordinates><panel_attributes>EnemyPlayer
+--
+- Point: _Position
+- String: _Id
+- String: _AssetId
+- Bool: _State;
+- Number: _Radius
+- Number: _Mass
+- Point: _OldPos;
+- Number: _Angle
+- Force[]: _Forces
+- String: _Name
+- String: _Id;
+- Number: _MaxHP;
+- Number: _Health;
+- Number: _MaxYPos
+- Number: _MaxXPos
++ Inventory: Inventory
+- GameObject: _Object_to_follow
+- Number: _AttackCounter;
+--
++ Player(Position, Id, Radius, Mass, AssetId, MaxY, MaxX, Name, MaxHP) 
++ Move()
++ AddForce(Force)
++ GetPosition()
++ GetAssetId()
++ GetId()
++ IsActive()
++ GetRadius()
++ GetMass()
++ GetAngle()
++ ModifyHP(Points)
++ GetHP()
++ GetName();
++ GetMaxHealth()
++ FlushForces()
++ Revert()
++ GetSpeedDt()
++ Analyze(objectpool, allowed_to_attack)
+- _CanFollowObject()
+- _RandomMove()
+- _TrySeekBuff(inv_items_pool)
+- _IsInVisionRange()
+- _Heal()
+- _Attack()
+- _WeaponCheck()
+- _FollowBuff()
+- _FollowPlayer()
+--</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>2370</x><y>560</y><w>130</w><h>30</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>630</x><y>2020</y><w>280</w><h>120</h></coordinates><panel_attributes>ControlActivationMap
+--
+- __ActivationMap;
+--
++ ActivateControl(key);
++ DeactivateControl(key)
++ GetControlState(key) 
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>800</x><y>1880</y><w>140</w><h>160</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>10;140;10;80;120;80;120;10</additional_attributes></element></diagram>
