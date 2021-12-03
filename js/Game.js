@@ -351,6 +351,7 @@ class Game {
                 //add new objects to map
                 this._GameObjects.Shells.push(res);
             }
+            this._ControlMap.DeactivateControl(ActivateItemBtn); //deactivate to avoid multiple handling
         }
         if (this._ControlMap.GetControlState(MoveUpBtn))
             this._GameObjects.Player.AddForce(new Force(PlayerAcceleration, 270));

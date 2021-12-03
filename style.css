@@ -10,6 +10,9 @@
 
 #about {
     text-align: center;
+    margin-left: 40%;
+    margin-top: 50px;
+    width: 20%;
 }
 
 #about #controls {
@@ -19,6 +22,11 @@
 
 #about a {
     width: 50%;
+}
+
+#about img {
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .settings {
@@ -38,7 +46,7 @@
     margin: 10px;
 }
 
-#mainmenu, #about {
+#mainmenu {
     margin-left: 40%;
     margin-top: 200px;
     width: 20%;
@@ -82,7 +90,7 @@ li:hover {
     border-style: dashed;
     overflow: hidden;
     background-color: lightsalmon;
-    opacity: 0.5;
+    opacity: 0.8;
     z-index: 3;
 }
 
@@ -206,15 +214,15 @@ div#workplace p {
 }
 
 .LiteWeaponShell {
-    background-color: white;
+    background-color: lightgray;
 }
 
 .FireWeaponShell {
     background-color: yellow;
 }
 
-.BibaWeaponShell {
-    background-image: url(res/biba.gif);
+.HeavyWeaponShell {
+    background-color: green;
 }
 
 /**Movable Objects End**/
@@ -234,8 +242,8 @@ div#workplace p {
     background-image: url(res/firecannon.png);
 }
 
-.BibaWeaponUI {
-    background-image: url(res/biba.gif);
+.HeavyWeaponUI {
+    background-image: url(res/Heavy.gif);
 }
 
 .HealBuffItemUI {
@@ -246,6 +254,7 @@ div#workplace p {
 
 html {
     background-color: black;
+    user-select: none;
 }
 
 body, html {

@@ -16,7 +16,7 @@ const AssetId =
     {
         LiteWeaponShell: "Body LiteWeaponShell",
         FireWeaponShell: "Body FireWeaponShell",
-        BibaWeaponShell: "Body BibaWeaponShell Map"
+        HeavyWeaponShell: "Body HeavyWeaponShell"
     },
     Buffs: {
         HealBuffItem: "Body HealBuffItem",
@@ -24,7 +24,7 @@ const AssetId =
     UI: {
         LiteWeaponUI: "Body LiteWeaponUI",
         FireWeaponUI: "Body FireWeaponUI",
-        BibaWeaponUI: "Body BibaWeaponUI",
+        HeavyWeaponUI: "Body HeavyWeaponUI",
         HealBuffItemUI: "Body HealBuffItemUI"
     }
 }
@@ -223,7 +223,7 @@ class WeaponItem extends InventoryItem {
             if (ActivationPoint !== undefined) {
                 angle = Point.VectorNormalAngle(Pos, ActivationPoint);
             }
-            shell.AddForce(new Force(4, 180 + (180 - angle))); //rotate coordinate system first, in order to correct y angle
+            shell.AddForce(new Force(ShellAcceleration, 180 + (180 - angle))); //rotate coordinate system first, in order to correct y angle
             this.Amount -= 1;
             return shell;
         }
@@ -280,7 +280,7 @@ class MovableObject extends GameObject {
         super(Position, Id, AssetId, Radius, Mass);
         this.MaxYPos = MaxY;
         this.MaxXPos = MaxX;
-        this._OldPos;
+        this._OldPos = null;
         this._Angle = 0; //угол в градусах, угол в сторону которого движется тело относительно нормали (0-360)
         this._Forces = [];
     }
@@ -346,7 +346,7 @@ class MovableObject extends GameObject {
      * @returns 
      */
     GetSpeedDt() {
-        if (this._OldPos === undefined) {
+        if (this._OldPos === null) {
             return 0;
         }
         else {
@@ -358,7 +358,7 @@ class MovableObject extends GameObject {
      * Возвращает тело на его предыдущую позицию
      */
     Revert() {
-        if (this._OldPos !== undefined) {
+        if (this._OldPos !== null) {
             if (this._OldPos === this._Position) {
                 this._Position.X -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1)); //teleport to random spot
                 this._Position.Y -= this._Radius * Math.round(Randomizer.GetRandomInt(-1, 1));
@@ -420,6 +420,10 @@ class Shell extends MovableObject {
 
     GetFatherID() {
         return this._FatherID;
+    }
+
+    GetOldPos() {
+        return this._OldPos;
     }
 
     Move() {
@@ -534,7 +538,7 @@ class EnemyPlayer extends Player {
         let need_heal = false;
         let need_weapon = false;
         if ((this.GetHP() * 100 / this.GetMaxHP()) < 50) { //если хп < 50%, срочно ищем хилку
-            need_heal = true;
+            need_heal = !this._Heal();
         }
         need_weapon = !this._WeaponCheck();
         if (this._CanFollowObject()) {   //если мы можем продолжать полет за текущим телом
@@ -704,7 +708,7 @@ class EnemyPlayer extends Player {
             let Item = this.Inventory.GetItemAt(i);
             if (Item instanceof BuffItem) {
                 this.Inventory.SelectItem(i);
-                this.Inventory.ActivateItem(player_obj);
+                this.Inventory.ActivateItem(this);
                 return true;
             }
         }
