@@ -11,7 +11,7 @@ class FrameProcessor {
         let len5 = objectpool.MovableBodies.length;
         for (let i = 0; i < len; ++i) {
             for (let j = 0; j < len2; ++j) {
-                if (this._IsReachable(objectpool.Players[i], objectpool.Shells[j])
+                if (this._IsObjShellReachable(objectpool.Players[i], objectpool.Shells[j])
                     && objectpool.Shells[j].GetFatherID() !== objectpool.Players[i].GetId()) {
                     this._ApplyPlayerShellCollision(objectpool.Players[i], objectpool.Shells[j]);
                 }
@@ -23,25 +23,25 @@ class FrameProcessor {
             }
             for (let j = 0; j < len4; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.StaticBodies[j])) {
-                    this._ApplyPlayerStaticBodyItemCollision(objectpool.Players[i]);
+                    this._ApplyPlayerStaticBodyCollision(objectpool.Players[i]);
                 }
             }
             for (let j = 0; j < len5; ++j) {
                 if (this._IsReachable(objectpool.Players[i], objectpool.MovableBodies[j])) {
-                    this._ApplyPlayerMovableBodyItemCollision(objectpool.Players[i], objectpool.MovableBodies[j]);
+                    this._ApplyPlayerMovableBodyCollision(objectpool.Players[i], objectpool.MovableBodies[j]);
                 }
             }
         }  //mov bodies + shells
         for (let i = 0; i < len5; ++i)
             for (let j = 0; j < len2; ++j) {
-                if (this._IsReachable(objectpool.MovableBodies[i], objectpool.Shells[j])) {
+                if (this._IsObjShellReachable(objectpool.MovableBodies[i], objectpool.Shells[j])) {
                     objectpool.Shells[j].Deactivate();
                 }
             }
         //static bodies + shells
         for (let i = 0; i < len4; ++i)
             for (let j = 0; j < len2; ++j) {
-                if (this._IsReachable(objectpool.StaticBodies[i], objectpool.Shells[j])) {
+                if (this._IsObjShellReachable(objectpool.StaticBodies[i], objectpool.Shells[j])) {
                     objectpool.Shells[j].Deactivate();
                 }
             }
@@ -52,6 +52,37 @@ class FrameProcessor {
         return r >= Point.Distance(Obj1.GetPosition(), Obj2.GetPosition());
     }
 
+    /**
+     * Проверяет произошла ли коллизия между объектом и снарядом в момент его перехода из старой к новой позиции
+     */
+    static _IsObjShellReachable(Obj, Shell) {
+        /**
+         * Снаряд может двигаться очень быстро, перескакивая от одной позиции на другую,
+         * но при этом на траектории его движения могут быть элементы с которыми он может 
+         * столкнуться
+         */
+        //determine shell prev and current position
+        let oldpos = Shell.GetOldPos();
+        if (oldpos === null) {
+            return this._IsReachable(Obj, Shell);
+        }
+        let curpos = Shell.GetPosition();
+        let xstart = oldpos.X;
+        let xend = curpos.X;
+        let ystart = oldpos.Y;
+        let yend = curpos.Y;
+        let xlen = Math.abs(xend - xstart);
+        let ylen = Math.abs(yend - ystart);
+        let xstep = curpos.X > oldpos.X ? xlen / ShellCollisionTrack : -xlen / ShellCollisionTrack;
+        let ystep = curpos.Y > oldpos.Y ? ylen / ShellCollisionTrack : -ylen / ShellCollisionTrack;
+        for (let x = xstart, y = ystart, i = 0; i < ShellCollisionTrack; x += xstep, y += ystep, ++i) {
+            if (this._IsReachable(Obj, new GameObject(new Point(x, y), -1, '-1', Shell.GetRadius(), Shell.GetMass()))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     static _ApplyPlayerShellCollision(player, shell) {
         shell.Deactivate();
         player.ModifyHP(-shell.GetDamage());
@@ -60,12 +91,12 @@ class FrameProcessor {
         player.Inventory.AddItem(inv_item);
         inv_item.Deactivate();
     }
-    static _ApplyPlayerStaticBodyItemCollision(player) {      //dummy physics
+    static _ApplyPlayerStaticBodyCollision(player) {      //dummy physics
         player.ModifyHP(-player.GetSpeedDt() * player.GetMass() * 0.1);
         player.FlushForces();
         player.Revert();
     }
-    static _ApplyPlayerMovableBodyItemCollision(player, movable_body) {
+    static _ApplyPlayerMovableBodyCollision(player, movable_body) {
         player.ModifyHP(-(player.GetSpeedDt() * player.GetMass() + movable_body.GetSpeedDt() * movable_body.GetMass()) * 0.001);
         player.FlushForces();
         player.Revert();
